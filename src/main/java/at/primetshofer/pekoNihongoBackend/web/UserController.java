@@ -4,6 +4,7 @@ import at.primetshofer.pekoNihongoBackend.dto.RegisterDto;
 import at.primetshofer.pekoNihongoBackend.dto.UserDto;
 import at.primetshofer.pekoNihongoBackend.security.authentication.AuthConstants;
 import at.primetshofer.pekoNihongoBackend.security.exception.ApplicationAuthenticationException;
+import at.primetshofer.pekoNihongoBackend.security.user.AuthUser;
 import at.primetshofer.pekoNihongoBackend.security.user.Role;
 import at.primetshofer.pekoNihongoBackend.service.AuthenticationService;
 import at.primetshofer.pekoNihongoBackend.service.UserService;
@@ -25,6 +26,13 @@ public class UserController {
     public UserController(UserService userService, AuthenticationService authenticationService) {
         this.userService = userService;
         this.authenticationService = authenticationService;
+    }
+
+    @GetMapping("/currentUser")
+    public UserDto get() {
+        AuthUser authUser = (AuthUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return new UserDto(userService.getUserById(authUser.userId()));
     }
 
     @GetMapping

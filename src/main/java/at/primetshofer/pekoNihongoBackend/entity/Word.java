@@ -37,6 +37,24 @@ public class Word {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public Word() {
+    }
+
+    public Word(Long id, String japanese, String english, String kana, User user) {
+        this.id = id;
+        this.japanese = japanese;
+        this.english = english;
+        this.kana = kana;
+        this.user = user;
+    }
+
+    public Word(String japanese, String english, String kana, User user) {
+        this.japanese = japanese;
+        this.english = english;
+        this.kana = kana;
+        this.user = user;
+    }
+
     public Long getId() {
         return id;
     }

@@ -11,6 +11,15 @@ public class UserSettings {
 
     private Integer maxDailyKanji;
 
+    public UserSettings() {
+    }
+
+    public UserSettings(Integer voiceId, Integer maxDailyWords, Integer maxDailyKanji) {
+        this.voiceId = voiceId;
+        this.maxDailyWords = maxDailyWords;
+        this.maxDailyKanji = maxDailyKanji;
+    }
+
     public Integer getVoiceId() {
         return voiceId;
     }
