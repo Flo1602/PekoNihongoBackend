@@ -33,3 +33,4 @@ build/
 .vscode/
 /data/data.mv.db
 /data/data.trace.db
+/resources/

@@ -8,12 +8,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    public static final String AUDIO_PATH = "D:/Flo 1602/Projekte/PekoNihongo/pekoNihongoBackend/audio/";
+    public static final String AUDIO_PATH = "D:/Flo 1602/Projekte/PekoNihongo/pekoNihongoBackend/resources/";
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
-                .addResourceHandler("/audio/**")
+                .addResourceHandler("/resources/**")
                 .addResourceLocations("file:" + AUDIO_PATH)
                 .setCachePeriod(0)
                 .resourceChain(true);
@@ -23,7 +23,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         // apply CORS to the audio endpoint
         registry
-                .addMapping("/audio/**")
+                .addMapping("/resources/**")
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "OPTIONS")
                 .allowedHeaders("*");

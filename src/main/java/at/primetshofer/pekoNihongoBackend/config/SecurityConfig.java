@@ -61,7 +61,7 @@ public class SecurityConfig {
                         mather ->
                                 mather
                                         .requestMatchers(
-                                                "/audio/**")
+                                                "/resources/**")
                                         .permitAll())
                 .authorizeHttpRequests(
                         mather ->
