@@ -4,10 +4,15 @@ import at.primetshofer.pekoNihongoBackend.entity.Kanji;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.repository.KanjiRepository;
 import at.primetshofer.pekoNihongoBackend.utils.JapaneseUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class KanjiService {
@@ -60,5 +65,25 @@ public class KanjiService {
         }
 
         word.getKanjis().removeAll(removeKanjis);
+    }
+
+    public Page<Kanji> getKanji(int pageSize, int page, Long userId) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+        return kanjiRepository.findAllByUserId(userId, pageable);
+    }
+
+    public boolean deleteKanji(Long id, Long userId) {
+        Optional<Kanji> kanji = kanjiRepository.findByIdAndUserId(id, userId);
+
+        if (kanji.isEmpty()) {
+            return false;
+        }
+        if (!kanji.get().getWords().isEmpty()) {
+            return false;
+        }
+
+        kanjiRepository.deleteById(id);
+        return true;
     }
 }

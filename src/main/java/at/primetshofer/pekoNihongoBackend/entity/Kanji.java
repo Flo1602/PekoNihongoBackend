@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(indexes = @Index(columnList = "nextDueDate"))
-public class Kanji {
+public class Kanji implements Learnable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,10 +45,12 @@ public class Kanji {
         this.id = id;
     }
 
+    @Override
     public Progress getProgress() {
         return progress;
     }
 
+    @Override
     public void setProgress(Progress progress) {
         this.progress = progress;
     }

@@ -3,13 +3,12 @@ package at.primetshofer.pekoNihongoBackend.service;
 import at.primetshofer.pekoNihongoBackend.config.WebMvcConfig;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.repository.WordRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -85,9 +84,17 @@ public class WordService {
         }
     }
 
+    public List<Word> getWords(Long userId, Collection<Long> wordIds) {
+        return wordRepository.getWordsByUserIdAndIdIn(userId, wordIds);
+    }
+
     public Page<Word> getWords(int pageSize, int page, Long userId) {
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
         Pageable pageable = PageRequest.of(page, pageSize, sort);
         return wordRepository.findAllByUserId(userId, pageable);
+    }
+
+    public List<Word> getWords(int count, Long currentUserId) {
+        return wordRepository.getWordsByUserId(currentUserId, Limit.of(count));
     }
 }

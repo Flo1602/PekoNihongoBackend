@@ -1,8 +1,6 @@
 package at.primetshofer.pekoNihongoBackend.entity;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
 
 import java.time.LocalDate;
 
@@ -15,9 +13,21 @@ public class Progress {
 
     private LocalDate nextDueDate;
 
+    private LocalDate firstLearned;
+
+    private Boolean isDueToday;
+
     private Integer learnedDays;
 
     private Integer negativeDays;
+
+    public Boolean getDueToday() {
+        return isDueToday;
+    }
+
+    public void setDueToday(Boolean dueToday) {
+        isDueToday = dueToday;
+    }
 
     public Integer getPoints() {
         return points;
@@ -57,5 +67,13 @@ public class Progress {
 
     public void setNegativeDays(Integer negativeDays) {
         this.negativeDays = negativeDays;
+    }
+
+    public LocalDate getFirstLearned() {
+        return firstLearned;
+    }
+
+    public void setFirstLearned(LocalDate firstLearned) {
+        this.firstLearned = firstLearned;
     }
 }
