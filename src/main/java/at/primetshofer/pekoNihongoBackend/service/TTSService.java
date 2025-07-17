@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class TTSService {
 
-    public static final String WORD_AUDIO_SAVE_PATH = WebMvcConfig.AUDIO_PATH + "/words";
+    public static final String WORD_AUDIO_SAVE_PATH = WebMvcConfig.STATIC_RESOURCE_LOCATION + "/audio/words";
 
     private static final String VOICEVOX_BASE_URL = "http://localhost:50021"; // Default Voicevox API URL
 

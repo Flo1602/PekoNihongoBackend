@@ -23,6 +23,10 @@ public class KanjiService {
         this.kanjiRepository = kanjiRepository;
     }
 
+    public Kanji getBySymbol(Character symbol, Long userId) {
+        return kanjiRepository.findByUserIdAndSymbol(userId, symbol);
+    }
+
     public void unlinkKanji(Word word) {
         for (Kanji kanji : word.getKanjis()) {
             kanji.getWords().remove(word);

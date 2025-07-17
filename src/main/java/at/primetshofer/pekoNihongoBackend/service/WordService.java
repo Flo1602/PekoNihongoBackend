@@ -44,7 +44,7 @@ public class WordService {
             throw new IllegalArgumentException("Word with id " + newWord.getId() + " does not exist");
         }
 
-        deleteAudioFile(updatedWord);
+        audioService.deleteAudioFile(updatedWord);
 
         updatedWord.setJapanese(newWord.getJapanese());
         updatedWord.setKana(newWord.getKana());
@@ -67,22 +67,13 @@ public class WordService {
 
         kanjiService.unlinkKanji(word.get());
 
-        deleteAudioFile(word.get());
+        audioService.deleteAudioFile(word.get());
 
         wordRepository.deleteById(wordId);
         return true;
     }
 
-    private void deleteAudioFile(Word word){
-        if (word.getTtsPath() != null) {
-            try {
-                File audioFile = new java.io.File((WebMvcConfig.AUDIO_PATH + "/" + word.getTtsPath()));
-                audioFile.delete();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
+
 
     public List<Word> getWords(Long userId, Collection<Long> wordIds) {
         return wordRepository.getWordsByUserIdAndIdIn(userId, wordIds);

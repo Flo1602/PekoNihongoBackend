@@ -8,13 +8,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    public static final String AUDIO_PATH = "D:/Flo 1602/Projekte/PekoNihongo/pekoNihongoBackend/resources/";
+    public static final String STATIC_RESOURCE_LOCATION = "D:/Flo 1602/Projekte/PekoNihongo/pekoNihongoBackend/resources/";
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
                 .addResourceHandler("/resources/**")
-                .addResourceLocations("file:" + AUDIO_PATH)
+                .addResourceLocations("file:" + STATIC_RESOURCE_LOCATION)
                 .setCachePeriod(0)
                 .resourceChain(true);
     }

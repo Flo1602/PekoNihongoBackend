@@ -17,4 +17,6 @@ public interface KanjiRepository extends JpaRepository<Kanji, Long> {
     Page<Kanji> findAllByUserId(Long userId, Pageable pageable);
 
     Optional<Kanji> findByIdAndUserId(Long id, Long userId);
+
+    Kanji findByUserIdAndSymbol(Long userId, char symbol);
 }

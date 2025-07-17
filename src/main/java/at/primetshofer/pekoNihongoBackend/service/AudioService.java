@@ -1,5 +1,6 @@
 package at.primetshofer.pekoNihongoBackend.service;
 
+import at.primetshofer.pekoNihongoBackend.config.WebMvcConfig;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.UserSettings;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
@@ -44,11 +45,23 @@ public class AudioService {
                 word.setTtsPath(audioFile.getPath().replace("\\", "/").split("audio/")[1]);
 
                 wordRepository.save(word);
-
-                Thread.sleep(5000);
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         });
+    }
+
+    public void deleteAudioFile(Word word){
+        if (word.getTtsPath() != null) {
+            try {
+                File audioFile = new java.io.File((WebMvcConfig.STATIC_RESOURCE_LOCATION + "/audio/" + word.getTtsPath()));
+                boolean delete = audioFile.delete();
+                if (!delete) {
+                    throw new Exception("Could not delete audio file " + audioFile.getPath());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

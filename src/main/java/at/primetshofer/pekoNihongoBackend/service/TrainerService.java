@@ -1,5 +1,6 @@
 package at.primetshofer.pekoNihongoBackend.service;
 
+import at.primetshofer.pekoNihongoBackend.dto.japneseLearningApp.OldProgressDto;
 import at.primetshofer.pekoNihongoBackend.entity.Learnable;
 import at.primetshofer.pekoNihongoBackend.entity.Progress;
 import at.primetshofer.pekoNihongoBackend.repository.IProgressRepository;
@@ -47,13 +48,11 @@ public class TrainerService {
             return List.of();
         }
 
-        Sort.Order orderIsDueTodayDesc = new Sort.Order(Sort.Direction.DESC, "progress.isDueToday");
-
-        Sort.Order orderProgressNullFirst = new Sort.Order(Sort.Direction.ASC, "progress").nullsFirst();
+        Sort.Order orderIsDueTodayDesc = new Sort.Order(Sort.Direction.DESC, "progress.isDueToday").nullsFirst();
 
         Sort.Order orderIdDesc = new Sort.Order(Sort.Direction.DESC, "id");
 
-        Sort sort = Sort.by(orderIsDueTodayDesc, orderProgressNullFirst, orderIdDesc);
+        Sort sort = Sort.by(orderIsDueTodayDesc, orderIdDesc);
         Limit limit = Limit.of(getCount);
 
         return progressRepository.findAllByProgress_NextDueDateLessThanEqualOrProgress_IsDueTodayOrProgressIsNullAndUserId(
@@ -189,4 +188,21 @@ public class TrainerService {
         return date != null && date.isEqual(LocalDateTime.now().toLocalDate());
     }
 
+    public <T extends Learnable> void importOldData(T t, List<OldProgressDto> oldProgresses, IProgressRepository<T> progressRepository) {
+        Progress progress = new Progress();
+        int learnedDays = 0;
+        for (OldProgressDto oldProgress : oldProgresses) {
+            learnedDays += oldProgress.compressedEntries();
+        }
+        progress.setLearnedDays(learnedDays);
+        progress.setFirstLearned(oldProgresses.getFirst().learned().toLocalDate());
+        progress.setLastLearned(oldProgresses.getLast().learned().toLocalDate());
+        progress.setPoints(oldProgresses.getLast().points());
+        progress.setDueToday(false);
+        progress.setNextDueDate(oldProgresses.getLast().learned().toLocalDate().plusDays(getIntervalDays(oldProgresses.getLast().points())));
+
+        t.setProgress(progress);
+
+        progressRepository.save(t);
+    }
 }
