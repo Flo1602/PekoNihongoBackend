@@ -70,7 +70,7 @@ public class WordLearnController {
     public ProgressDataDto getDueCount() {
         User user = webUtils.getCurrentUser();
 
-        return trainerService.ProgressDataDto(wordProgressRepository, user);
+        return trainerService.ProgressDataDto(wordProgressRepository, user.getId(), user.getUserSettings().getMaxDailyWords());
     }
 
 }

@@ -6,6 +6,7 @@ import at.primetshofer.pekoNihongoBackend.dto.ProgressDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordDto;
 import at.primetshofer.pekoNihongoBackend.entity.Kanji;
 import at.primetshofer.pekoNihongoBackend.entity.User;
+import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.repository.KanjiProgressRepository;
 import at.primetshofer.pekoNihongoBackend.security.authentication.AuthConstants;
 import at.primetshofer.pekoNihongoBackend.service.KanjiService;
@@ -15,6 +16,7 @@ import at.primetshofer.pekoNihongoBackend.utils.WebUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -45,8 +47,10 @@ public class KanjiLearnController {
         User user = webUtils.getCurrentUser();
 
         Kanji kanji = trainerService.getDueElements(kanjiProgressRepository, 1, user.getId(), user.getUserSettings().getMaxDailyKanji()).getFirst();
+        List<Word> words = kanji.getWords();
+        Collections.shuffle(words);
 
-        return new KanjiLearningDto(kanji.getId(), kanji.getSymbol() + "", kanji.getWords().stream().map(WordDto::new).toList(), wordService.getRandomWords(wordCount, user.getId()).stream().map(WordDto::new).toList());
+        return new KanjiLearningDto(kanji.getId(), kanji.getSymbol() + "", words.stream().map(WordDto::new).toList(), wordService.getRandomWords(wordCount, user.getId()).stream().map(WordDto::new).toList());
     }
 
     @PostMapping
@@ -59,6 +63,7 @@ public class KanjiLearnController {
         }
 
         correct /= progresses.size();
+        correct *= 100;
 
         User user = webUtils.getCurrentUser();
 
@@ -71,6 +76,6 @@ public class KanjiLearnController {
     public ProgressDataDto getDueCount() {
         User user = webUtils.getCurrentUser();
 
-        return trainerService.ProgressDataDto(kanjiProgressRepository, user);
+        return trainerService.ProgressDataDto(kanjiProgressRepository, user.getId(), user.getUserSettings().getMaxDailyKanji());
     }
 }

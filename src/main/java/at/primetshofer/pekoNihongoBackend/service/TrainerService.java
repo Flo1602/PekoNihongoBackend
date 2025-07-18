@@ -213,10 +213,10 @@ public class TrainerService {
         progressRepository.save(t);
     }
 
-    public <T extends Learnable> ProgressDataDto ProgressDataDto(IProgressRepository<T> progressRepository, User user) {
-        long dueToday = getDueElementsCount(progressRepository, user.getId(), user.getUserSettings().getMaxDailyWords());
-        long dueTotal = getDueElementsCount(progressRepository, user.getId(), -1);
-        long completedToday = getCompletedToday(progressRepository, user.getId());
+    public <T extends Learnable> ProgressDataDto ProgressDataDto(IProgressRepository<T> progressRepository, Long userId, int maxElements) {
+        long dueToday = getDueElementsCount(progressRepository, userId, maxElements);
+        long dueTotal = getDueElementsCount(progressRepository, userId, -1);
+        long completedToday = getCompletedToday(progressRepository, userId);
 
         return new ProgressDataDto(dueToday, completedToday, dueTotal);
     }
