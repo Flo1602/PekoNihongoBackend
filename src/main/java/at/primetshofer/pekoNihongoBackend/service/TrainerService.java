@@ -1,8 +1,10 @@
 package at.primetshofer.pekoNihongoBackend.service;
 
+import at.primetshofer.pekoNihongoBackend.dto.ProgressDataDto;
 import at.primetshofer.pekoNihongoBackend.dto.japneseLearningApp.OldProgressDto;
 import at.primetshofer.pekoNihongoBackend.entity.Learnable;
 import at.primetshofer.pekoNihongoBackend.entity.Progress;
+import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.repository.IProgressRepository;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -37,12 +40,8 @@ public class TrainerService {
     }
 
     public <T extends Learnable> List<T> getDueElements(IProgressRepository<T> progressRepository, int elementsToGet, Long userId, int maxElements){
-        int getCount = elementsToGet;
         long finishedLearning = getCompletedToday(progressRepository, userId);
-
-        if(getCount + finishedLearning > maxElements) {
-            getCount = maxElements - (int)finishedLearning;
-        }
+        int getCount = maxElements - (int)finishedLearning;
 
         if(getCount <= 0) {
             return List.of();
@@ -55,12 +54,20 @@ public class TrainerService {
         Sort sort = Sort.by(orderIsDueTodayDesc, orderIdDesc);
         Limit limit = Limit.of(getCount);
 
-        return progressRepository.findAllByProgress_NextDueDateLessThanEqualOrProgress_IsDueTodayOrProgressIsNullAndUserId(
+        List<T> dueElements = progressRepository.findAllByProgress_NextDueDateLessThanEqualOrProgress_IsDueTodayOrProgressIsNullAndUserId(
                 LocalDate.now(),
                 true,
                 sort,
                 limit,
                 userId);
+
+        Collections.shuffle(dueElements);
+
+        if(elementsToGet > dueElements.size()) {
+            return dueElements;
+        }
+
+        return dueElements.subList(0, elementsToGet);
     }
 
     public <T extends Learnable> void saveProgress(T t, IProgressRepository<T> progressRepository, int percentage) {
@@ -204,5 +211,13 @@ public class TrainerService {
         t.setProgress(progress);
 
         progressRepository.save(t);
+    }
+
+    public <T extends Learnable> ProgressDataDto ProgressDataDto(IProgressRepository<T> progressRepository, User user) {
+        long dueToday = getDueElementsCount(progressRepository, user.getId(), user.getUserSettings().getMaxDailyWords());
+        long dueTotal = getDueElementsCount(progressRepository, user.getId(), -1);
+        long completedToday = getCompletedToday(progressRepository, user.getId());
+
+        return new ProgressDataDto(dueToday, completedToday, dueTotal);
     }
 }

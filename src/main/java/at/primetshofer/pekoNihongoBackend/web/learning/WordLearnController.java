@@ -70,11 +70,7 @@ public class WordLearnController {
     public ProgressDataDto getDueCount() {
         User user = webUtils.getCurrentUser();
 
-        long dueToday = trainerService.getDueElementsCount(wordProgressRepository, user.getId(), user.getUserSettings().getMaxDailyWords());
-        long dueTotal = trainerService.getDueElementsCount(wordProgressRepository, user.getId(), -1);
-        long completedToday = trainerService.getCompletedToday(wordProgressRepository, webUtils.getCurrentUserId());
-
-        return new ProgressDataDto(dueToday, completedToday, dueTotal);
+        return trainerService.ProgressDataDto(wordProgressRepository, user);
     }
 
 }

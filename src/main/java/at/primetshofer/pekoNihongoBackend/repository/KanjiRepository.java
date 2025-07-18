@@ -19,4 +19,6 @@ public interface KanjiRepository extends JpaRepository<Kanji, Long> {
     Optional<Kanji> findByIdAndUserId(Long id, Long userId);
 
     Kanji findByUserIdAndSymbol(Long userId, char symbol);
+
+    Kanji findByUserIdAndId(Long userId, Long id);
 }

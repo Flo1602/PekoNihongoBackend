@@ -27,6 +27,10 @@ public class KanjiService {
         return kanjiRepository.findByUserIdAndSymbol(userId, symbol);
     }
 
+    public Kanji getById(Long kanjiId, Long userId) {
+        return kanjiRepository.findByUserIdAndId(userId, kanjiId);
+    }
+
     public void unlinkKanji(Word word) {
         for (Kanji kanji : word.getKanjis()) {
             kanji.getWords().remove(word);

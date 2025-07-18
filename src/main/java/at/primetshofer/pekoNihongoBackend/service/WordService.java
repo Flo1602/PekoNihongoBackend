@@ -1,12 +1,10 @@
 package at.primetshofer.pekoNihongoBackend.service;
 
-import at.primetshofer.pekoNihongoBackend.config.WebMvcConfig;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.repository.WordRepository;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +83,7 @@ public class WordService {
         return wordRepository.findAllByUserId(userId, pageable);
     }
 
-    public List<Word> getWords(int count, Long currentUserId) {
-        return wordRepository.getWordsByUserId(currentUserId, Limit.of(count));
+    public List<Word> getRandomWords(int count, Long currentUserId) {
+        return wordRepository.findRandomItems(currentUserId, Limit.of(count));
     }
 }
