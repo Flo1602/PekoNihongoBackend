@@ -1,15 +1,18 @@
 package at.primetshofer.pekoNihongoBackend.web;
 
+import at.primetshofer.pekoNihongoBackend.dto.StatsDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordDto;
 import at.primetshofer.pekoNihongoBackend.dto.japneseLearningApp.OldKanjiDto;
 import at.primetshofer.pekoNihongoBackend.dto.japneseLearningApp.OldWordDto;
 import at.primetshofer.pekoNihongoBackend.entity.Kanji;
+import at.primetshofer.pekoNihongoBackend.entity.LearnTimeStats;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.repository.KanjiProgressRepository;
 import at.primetshofer.pekoNihongoBackend.repository.WordProgressRepository;
 import at.primetshofer.pekoNihongoBackend.security.authentication.AuthConstants;
 import at.primetshofer.pekoNihongoBackend.service.KanjiService;
+import at.primetshofer.pekoNihongoBackend.service.StatsService;
 import at.primetshofer.pekoNihongoBackend.service.TrainerService;
 import at.primetshofer.pekoNihongoBackend.service.WordService;
 import at.primetshofer.pekoNihongoBackend.utils.WebUtils;
@@ -31,6 +34,7 @@ public class ImportController {
     private final KanjiProgressRepository kanjiProgressRepository;
     private final WordService wordService;
     private final KanjiService kanjiService;
+    private final StatsService statsService;
     private final WebUtils webUtils;
 
     public ImportController(TrainerService trainerService,
@@ -38,13 +42,15 @@ public class ImportController {
                             WordService wordService,
                             WebUtils webUtils,
                             KanjiService kanjiService,
-                            KanjiProgressRepository kanjiProgressRepository) {
+                            KanjiProgressRepository kanjiProgressRepository,
+                            StatsService statsService) {
         this.trainerService = trainerService;
         this.wordProgressRepository = wordProgressRepository;
         this.wordService = wordService;
         this.webUtils = webUtils;
         this.kanjiService = kanjiService;
         this.kanjiProgressRepository = kanjiProgressRepository;
+        this.statsService = statsService;
     }
 
     @PostMapping("/word")
@@ -65,5 +71,11 @@ public class ImportController {
 
         trainerService.importOldData(kanji, Arrays.asList(oldKanjiDto.progress()), kanjiProgressRepository);
         return true;
+    }
+
+    @PostMapping("/stats")
+    public void importStats(@RequestBody StatsDto statsDto) {
+        User currentUser = webUtils.getCurrentUser();
+        statsService.addStat(new LearnTimeStats(statsDto.date(), statsDto.duration(), statsDto.exercises()), currentUser);
     }
 }

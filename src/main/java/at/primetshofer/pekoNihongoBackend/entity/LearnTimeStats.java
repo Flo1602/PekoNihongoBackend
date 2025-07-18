@@ -26,6 +26,15 @@ public class LearnTimeStats {
     @Column(nullable = false)
     private Duration duration;
 
+    public LearnTimeStats() {
+    }
+
+    public LearnTimeStats(LocalDate date, Duration duration, int exercises) {
+        this.date = date;
+        this.duration = duration;
+        this.exercises = exercises;
+    }
+
     private int exercises;
 
     public Long getId() {
