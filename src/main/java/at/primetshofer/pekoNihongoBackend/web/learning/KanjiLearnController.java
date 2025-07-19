@@ -5,6 +5,7 @@ import at.primetshofer.pekoNihongoBackend.dto.ProgressDataDto;
 import at.primetshofer.pekoNihongoBackend.dto.ProgressDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordDto;
 import at.primetshofer.pekoNihongoBackend.entity.Kanji;
+import at.primetshofer.pekoNihongoBackend.entity.Progress;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.repository.KanjiProgressRepository;
@@ -50,11 +51,17 @@ public class KanjiLearnController {
         List<Word> words = kanji.getWords();
         Collections.shuffle(words);
 
+        Progress progress = kanji.getProgress();
+        int learnedDays = 0;
+        if(progress != null) {
+            learnedDays = progress.getLearnedDays();
+        }
+
         return new KanjiLearningDto(kanji.getId(),
                 kanji.getSymbol() + "",
                 words.stream().map(WordDto::new).toList(),
                 wordService.getRandomWordsWithKanji(wordCount, user.getId()).stream().map(WordDto::new).toList(),
-                kanji.getProgress().getLearnedDays());
+                learnedDays);
     }
 
     @PostMapping

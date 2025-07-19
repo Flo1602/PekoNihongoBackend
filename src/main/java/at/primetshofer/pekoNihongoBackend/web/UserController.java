@@ -46,7 +46,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto add(RegisterDto registerDto) {
+    public UserDto add(@RequestBody RegisterDto registerDto) {
         checkAdmin();
         return new UserDto(authenticationService.registerUser(registerDto));
     }
