@@ -21,6 +21,6 @@ public interface WordRepository extends JpaRepository<Word, Long> {
 
     List<Word> getWordsByUserIdAndIdIn(Long userId, Collection<Long> ids);
 
-    @Query("SELECT w FROM Word w where w.user.id = :userId ORDER BY function('RAND')")
-    List<Word> findRandomItems(@Param("userId") Long userId, Limit limit);
+    @Query("SELECT w FROM Word w WHERE w.user.id = :userId AND w.kanjis IS NOT EMPTY ORDER BY function('RAND')")
+    List<Word> findRandomItemsWithKanji(@Param("userId") Long userId, Limit limit);
 }

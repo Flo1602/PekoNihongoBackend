@@ -56,7 +56,7 @@ public class ImportController {
     @PostMapping("/word")
     public void importWord(@RequestBody OldWordDto oldWordDto) {
         User currentUser = webUtils.getCurrentUser();
-        Word word = wordService.addWord(new Word(oldWordDto.japanese(), oldWordDto.english(), oldWordDto.kana(), currentUser));
+        Word word = wordService.addWord(new Word(oldWordDto.japanese(), oldWordDto.english(), oldWordDto.kana(), currentUser), currentUser.getUserSettings().getUseAlwaysVoiceVox());
         trainerService.importOldData(word, Arrays.asList(oldWordDto.progress()), wordProgressRepository);
     }
 

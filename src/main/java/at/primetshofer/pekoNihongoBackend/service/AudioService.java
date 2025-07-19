@@ -7,6 +7,7 @@ import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.repository.UserRepository;
 import at.primetshofer.pekoNihongoBackend.repository.WordRepository;
 import at.primetshofer.pekoNihongoBackend.utils.JishoAudioFetcher;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -15,22 +16,37 @@ import java.io.IOException;
 @Service
 public class AudioService {
 
+    @Value("${pekoNihongoBackend.resources.location}")
+    private String staticResourceLocation;
+    @Value("${pekoNihongoBackend.resources.wordAudioSavePath}")
+    private String wordAudioSavePath;
+
     private final UserRepository userRepository;
     private final TTSService ttsService;
     private final AsyncService asyncService;
     private final WordRepository wordRepository;
+    private final JishoAudioFetcher jishoAudioFetcher;
 
-    public AudioService(UserRepository userRepository, TTSService ttsService, AsyncService asyncService, WordRepository wordRepository) {
+    public AudioService(UserRepository userRepository,
+                        TTSService ttsService,
+                        AsyncService asyncService,
+                        WordRepository wordRepository,
+                        JishoAudioFetcher jishoAudioFetcher) {
         this.userRepository = userRepository;
         this.ttsService = ttsService;
         this.asyncService = asyncService;
         this.wordRepository = wordRepository;
+        this.jishoAudioFetcher = jishoAudioFetcher;
     }
 
-    public void addAudioToWord(Word word) {
+    public void addAudioToWord(Word word, boolean useAlwaysVoiceVox) {
         asyncService.runAsync(() -> {
             try {
-                File audioFile = JishoAudioFetcher.fetchAudioURL(word.getJapanese(), word.getId());
+                File audioFile = null;
+
+                if(!useAlwaysVoiceVox){
+                    audioFile = jishoAudioFetcher.fetchAudioURL(word.getJapanese(), word.getId());
+                }
 
                 if (audioFile == null) {
                     UserSettings settings = userRepository.findById(word.getUser().getId()).orElse(new User()).getUserSettings();
@@ -39,7 +55,7 @@ public class AudioService {
                     }
 
                     String ttsString = (word.getKana() == null) ? word.getJapanese() : word.getKana();
-                    audioFile = ttsService.synthesizeAudio(ttsString, TTSService.WORD_AUDIO_SAVE_PATH + "/" + word.getId() + ".wav", settings.getVoiceId());
+                    audioFile = ttsService.synthesizeAudio(ttsString, staticResourceLocation + wordAudioSavePath + "/" + word.getId() + ".wav", settings.getVoiceId());
                 }
 
                 word.setTtsPath(audioFile.getPath().replace("\\", "/").split("audio/")[1]);
@@ -54,7 +70,7 @@ public class AudioService {
     public void deleteAudioFile(Word word){
         if (word.getTtsPath() != null) {
             try {
-                File audioFile = new java.io.File((WebMvcConfig.STATIC_RESOURCE_LOCATION + "/audio/" + word.getTtsPath()));
+                File audioFile = new java.io.File((staticResourceLocation + "/audio/" + word.getTtsPath()));
                 boolean delete = audioFile.delete();
                 if (!delete) {
                     throw new Exception("Could not delete audio file " + audioFile.getPath());

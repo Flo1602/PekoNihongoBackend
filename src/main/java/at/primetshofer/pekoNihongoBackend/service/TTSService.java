@@ -1,7 +1,7 @@
 package at.primetshofer.pekoNihongoBackend.service;
 
-import at.primetshofer.pekoNihongoBackend.config.WebMvcConfig;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -15,9 +15,8 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class TTSService {
 
-    public static final String WORD_AUDIO_SAVE_PATH = WebMvcConfig.STATIC_RESOURCE_LOCATION + "/audio/words";
-
-    private static final String VOICEVOX_BASE_URL = "http://localhost:50021"; // Default Voicevox API URL
+    @Value("${pekoNihongoBackend.voiceVox.url}")
+    private String voiceVoxBaseUrl;
 
     public File synthesizeAudio(String text, String savePath, Integer speakerId) throws IOException, InterruptedException {
         return synthesizeAudio(text, savePath, 1.0, speakerId);
@@ -31,7 +30,7 @@ public class TTSService {
 
         // Step 1: Generate audio query
         String encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8);
-        URI queryUri = URI.create(VOICEVOX_BASE_URL + "/audio_query?text=" + encodedText + "&speaker=" + speakerId);
+        URI queryUri = URI.create(voiceVoxBaseUrl + "/audio_query?text=" + encodedText + "&speaker=" + speakerId);
         HttpRequest queryRequest = HttpRequest.newBuilder()
                 .uri(queryUri)
                 .POST(HttpRequest.BodyPublishers.noBody())
@@ -49,7 +48,7 @@ public class TTSService {
         String modifiedAudioQuery = jsonQuery.toString();
 
         // Step 2: Synthesize audio using the generated query
-        URI synthesisUri = URI.create(VOICEVOX_BASE_URL + "/synthesis?speaker=" + speakerId);
+        URI synthesisUri = URI.create(voiceVoxBaseUrl + "/synthesis?speaker=" + speakerId);
         HttpRequest synthesisRequest = HttpRequest.newBuilder()
                 .uri(synthesisUri)
                 .header("Content-Type", "application/json")

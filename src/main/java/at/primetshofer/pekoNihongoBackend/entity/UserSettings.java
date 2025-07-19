@@ -11,13 +11,16 @@ public class UserSettings {
 
     private Integer maxDailyKanji;
 
+    private boolean useAlwaysVoiceVox;
+
     public UserSettings() {
     }
 
-    public UserSettings(Integer voiceId, Integer maxDailyWords, Integer maxDailyKanji) {
+    public UserSettings(Integer voiceId, Integer maxDailyWords, Integer maxDailyKanji, boolean useAlwaysVoiceVox) {
         this.voiceId = voiceId;
         this.maxDailyWords = maxDailyWords;
         this.maxDailyKanji = maxDailyKanji;
+        this.useAlwaysVoiceVox = useAlwaysVoiceVox;
     }
 
     public Integer getVoiceId() {
@@ -42,5 +45,13 @@ public class UserSettings {
 
     public void setMaxDailyKanji(Integer maxDailyKanji) {
         this.maxDailyKanji = maxDailyKanji;
+    }
+
+    public Boolean getUseAlwaysVoiceVox() {
+        return useAlwaysVoiceVox;
+    }
+
+    public void setUseAlwaysVoiceVox(Boolean useAlwaysVoiceVox) {
+        this.useAlwaysVoiceVox = useAlwaysVoiceVox;
     }
 }

@@ -1,7 +1,6 @@
 package at.primetshofer.pekoNihongoBackend.web;
 
 import at.primetshofer.pekoNihongoBackend.dto.SettingsDto;
-import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.UserSettings;
 import at.primetshofer.pekoNihongoBackend.security.authentication.AuthConstants;
 import at.primetshofer.pekoNihongoBackend.service.UserService;
@@ -28,12 +27,13 @@ public class SettingsController {
         if(userSettings != null) {
             return new SettingsDto(userSettings);
         }
-        return new SettingsDto(0, 0, 0);
+        return new SettingsDto(0, 0, 0, false);
     }
 
     @PutMapping
     public boolean update(@RequestBody SettingsDto settingsDto) {
-        userService.updateUserSettings(webUtils.getCurrentUserId(), new UserSettings(settingsDto.voiceId(), settingsDto.maxDailyWords(), settingsDto.maxDailyKanji()));
+        userService.updateUserSettings(webUtils.getCurrentUserId(),
+                new UserSettings(settingsDto.voiceId(), settingsDto.maxDailyWords(), settingsDto.maxDailyKanji(), settingsDto.useAlwaysVoiceVox()));
 
         return true;
     }

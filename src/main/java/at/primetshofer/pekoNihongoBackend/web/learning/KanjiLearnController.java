@@ -50,7 +50,11 @@ public class KanjiLearnController {
         List<Word> words = kanji.getWords();
         Collections.shuffle(words);
 
-        return new KanjiLearningDto(kanji.getId(), kanji.getSymbol() + "", words.stream().map(WordDto::new).toList(), wordService.getRandomWords(wordCount, user.getId()).stream().map(WordDto::new).toList());
+        return new KanjiLearningDto(kanji.getId(),
+                kanji.getSymbol() + "",
+                words.stream().map(WordDto::new).toList(),
+                wordService.getRandomWordsWithKanji(wordCount, user.getId()).stream().map(WordDto::new).toList(),
+                kanji.getProgress().getLearnedDays());
     }
 
     @PostMapping

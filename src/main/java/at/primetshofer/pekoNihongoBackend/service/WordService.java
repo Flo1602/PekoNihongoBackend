@@ -22,16 +22,16 @@ public class WordService {
         this.audioService = audioService;
     }
 
-    public Word addWord(Word word) {
+    public Word addWord(Word word, boolean useAlwaysVoiceVox) {
         Word dbWord = wordRepository.save(word);
         kanjiService.connectKanji(word);
 
-        audioService.addAudioToWord(word);
+        audioService.addAudioToWord(word, useAlwaysVoiceVox);
 
         return dbWord;
     }
 
-    public Word updateWord(Word newWord){
+    public Word updateWord(Word newWord, boolean useAlwaysVoiceVox){
         if (newWord == null) {
             throw new IllegalArgumentException("Word is null");
         }
@@ -52,7 +52,7 @@ public class WordService {
         Word dbWord = wordRepository.save(updatedWord);
 
         kanjiService.connectKanji(dbWord);
-        audioService.addAudioToWord(dbWord);
+        audioService.addAudioToWord(dbWord, useAlwaysVoiceVox);
 
         return dbWord;
     }
@@ -83,7 +83,7 @@ public class WordService {
         return wordRepository.findAllByUserId(userId, pageable);
     }
 
-    public List<Word> getRandomWords(int count, Long currentUserId) {
-        return wordRepository.findRandomItems(currentUserId, Limit.of(count));
+    public List<Word> getRandomWordsWithKanji(int count, Long currentUserId) {
+        return wordRepository.findRandomItemsWithKanji(currentUserId, Limit.of(count));
     }
 }

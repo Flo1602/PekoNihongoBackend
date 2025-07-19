@@ -1,5 +1,6 @@
 package at.primetshofer.pekoNihongoBackend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -8,13 +9,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    public static final String STATIC_RESOURCE_LOCATION = "D:/Flo 1602/Projekte/PekoNihongo/pekoNihongoBackend/resources/";
+    @Value("${pekoNihongoBackend.resources.location}")
+    private String staticResourceLocation;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
                 .addResourceHandler("/resources/**")
-                .addResourceLocations("file:" + STATIC_RESOURCE_LOCATION)
+                .addResourceLocations("file:" + staticResourceLocation)
                 .setCachePeriod(0)
                 .resourceChain(true);
     }

@@ -4,7 +4,6 @@ import at.primetshofer.pekoNihongoBackend.dto.ProgressDataDto;
 import at.primetshofer.pekoNihongoBackend.dto.japneseLearningApp.OldProgressDto;
 import at.primetshofer.pekoNihongoBackend.entity.Learnable;
 import at.primetshofer.pekoNihongoBackend.entity.Progress;
-import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.repository.IProgressRepository;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;

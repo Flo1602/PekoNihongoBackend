@@ -1,9 +1,10 @@
 package at.primetshofer.pekoNihongoBackend.utils;
 
-import at.primetshofer.pekoNihongoBackend.service.TTSService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,10 +12,16 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+@Service
 public class JishoAudioFetcher {
+    @Value("${pekoNihongoBackend.resources.location}")
+    private String staticResourceLocation;
+    @Value("${pekoNihongoBackend.resources.wordAudioSavePath}")
+    private String wordAudioSavePath;
+
     private static final String JISHO_URL = "https://jisho.org/search/";
 
-    public static File fetchAudioURL(String japanese, Long id) {
+    public File fetchAudioURL(String japanese, Long id) {
         String searchUrl = JISHO_URL + japanese;
 
         try {
@@ -40,14 +47,14 @@ public class JishoAudioFetcher {
         return null;
     }
 
-    private static File downloadAudio(String audioUrl, Long id) {
+    private File downloadAudio(String audioUrl, Long id) {
         try {
             URL url = new URL("https:" + audioUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("User-Agent", "Mozilla/5.0");
 
-            File audioFile = new File(TTSService.WORD_AUDIO_SAVE_PATH + "/" + id + ".mp3");
+            File audioFile = new File(staticResourceLocation + wordAudioSavePath + "/" + id + ".mp3");
             try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(audioFile)) {
                 byte[] buffer = new byte[1024];
                 int bytesRead;

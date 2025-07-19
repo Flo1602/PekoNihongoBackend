@@ -35,7 +35,7 @@ public class WordController {
     public WordDto add(@RequestBody WordDto wordDto) {
         User user = webUtils.getCurrentUser();
 
-        Word word = wordService.addWord(new Word(wordDto.japanese(), wordDto.english(), wordDto.kana(), user));
+        Word word = wordService.addWord(new Word(wordDto.japanese(), wordDto.english(), wordDto.kana(), user), user.getUserSettings().getUseAlwaysVoiceVox());
 
         return new WordDto(word);
     }
@@ -44,7 +44,7 @@ public class WordController {
     public WordDto update(@RequestBody WordDto wordDto) {
         User user = webUtils.getCurrentUser();
 
-        Word word = wordService.updateWord(new Word(wordDto.id(), wordDto.japanese(), wordDto.english(), wordDto.kana(), user));
+        Word word = wordService.updateWord(new Word(wordDto.id(), wordDto.japanese(), wordDto.english(), wordDto.kana(), user), user.getUserSettings().getUseAlwaysVoiceVox());
 
         return new WordDto(word);
     }

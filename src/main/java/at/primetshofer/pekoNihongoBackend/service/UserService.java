@@ -78,6 +78,7 @@ public class UserService {
         updatedUser.getUserSettings().setVoiceId(userSettings.getVoiceId());
         updatedUser.getUserSettings().setMaxDailyWords(userSettings.getMaxDailyWords());
         updatedUser.getUserSettings().setMaxDailyKanji(userSettings.getMaxDailyKanji());
+        updatedUser.getUserSettings().setUseAlwaysVoiceVox(userSettings.getUseAlwaysVoiceVox());
 
         userRepository.save(updatedUser);
     }
