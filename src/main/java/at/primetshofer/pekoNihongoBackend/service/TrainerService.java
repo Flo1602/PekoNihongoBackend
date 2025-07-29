@@ -22,7 +22,10 @@ public class TrainerService {
         if(maxElements <= 0) {
             maxElements = Integer.MAX_VALUE;
         }
-        long dueCount = progressRepository.countByProgress_NextDueDateLessThanEqualOrProgress_IsDueTodayOrProgressIsNullAndUserId(LocalDate.now(),
+        long dueCount = progressRepository.countByUserIdAndProgress_NextDueDateLessThanEqualOrUserIdAndProgress_IsDueTodayOrUserIdAndProgressIsNull(
+                userId,
+                LocalDate.now(),
+                userId,
                 true,
                 userId);
 
@@ -53,12 +56,14 @@ public class TrainerService {
         Sort sort = Sort.by(orderIsDueTodayDesc, orderIdDesc);
         Limit limit = Limit.of(getCount);
 
-        List<T> dueElements = progressRepository.findAllByProgress_NextDueDateLessThanEqualOrProgress_IsDueTodayOrProgressIsNullAndUserId(
+        List<T> dueElements = progressRepository.findAllByUserIdAndProgress_NextDueDateLessThanEqualOrUserIdAndProgress_IsDueTodayOrUserIdAndProgressIsNull(
+                userId,
                 LocalDate.now(),
+                userId,
                 true,
+                userId,
                 sort,
-                limit,
-                userId);
+                limit);
 
         Collections.shuffle(dueElements);
 

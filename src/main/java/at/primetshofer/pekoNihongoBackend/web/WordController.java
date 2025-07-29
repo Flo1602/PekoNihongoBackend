@@ -25,8 +25,8 @@ public class WordController {
     }
 
     @GetMapping
-    public PageDto<WordDto> get(@RequestParam int pageSize, @RequestParam int page) {
-        Page<Word> wordPage = wordService.getWords(pageSize, page, webUtils.getCurrentUserId());
+    public PageDto<WordDto> get(@RequestParam int pageSize, @RequestParam int page, @RequestParam(required = false) String search) {
+        Page<Word> wordPage = wordService.getWords(pageSize, page, webUtils.getCurrentUserId(), search == null ? "" : search.trim());
 
         return new PageDto<>(wordPage.getContent().stream().map(WordDto::new).toList(), wordPage.getTotalPages());
     }

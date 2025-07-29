@@ -77,9 +77,15 @@ public class WordService {
         return wordRepository.getWordsByUserIdAndIdIn(userId, wordIds);
     }
 
-    public Page<Word> getWords(int pageSize, int page, Long userId) {
+    public Page<Word> getWords(int pageSize, int page, Long userId, String searchString) {
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
         Pageable pageable = PageRequest.of(page, pageSize, sort);
+
+        if(searchString != null && !searchString.isEmpty()){
+            String like = "%" + searchString.trim().toLowerCase() + "%";
+            return wordRepository.searchByUserIdAndFields(userId, like, like, like, pageable);
+        }
+
         return wordRepository.findAllByUserId(userId, pageable);
     }
 

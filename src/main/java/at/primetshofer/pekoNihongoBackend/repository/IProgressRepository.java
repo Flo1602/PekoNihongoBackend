@@ -8,18 +8,23 @@ import java.util.List;
 
 public interface IProgressRepository<T> {
 
-    List<T> findAllByProgress_NextDueDateLessThanEqualOrProgress_IsDueTodayOrProgressIsNullAndUserId(LocalDate progressNextDueDateIsLessThan,
-                                                                                                     Boolean progressIsDueToday,
-                                                                                                     Sort sort,
-                                                                                                     Limit limit,
-                                                                                                     Long userId);
+    List<T> findAllByUserIdAndProgress_NextDueDateLessThanEqualOrUserIdAndProgress_IsDueTodayOrUserIdAndProgressIsNull(
+            Long      userId1,
+            LocalDate nextDueDate,
+            Long      userId2,
+            Boolean   isDueToday,
+            Long      userId3,
+            Sort      sort,
+            Limit  limit);
 
     T save(T entity);
 
-    long countByProgress_NextDueDateLessThanEqualOrProgress_IsDueTodayOrProgressIsNullAndUserId(
-            LocalDate progressNextDueDateIsLessThanEqual,
-            Boolean progressIsDueToday,
-            Long userId
+    long countByUserIdAndProgress_NextDueDateLessThanEqualOrUserIdAndProgress_IsDueTodayOrUserIdAndProgressIsNull(
+            Long      userId1,
+            LocalDate nextDueDate,
+            Long      userId2,
+            Boolean   isDueToday,
+            Long      userId3
     );
 
     long countByProgress_LastLearnedAndProgress_IsDueTodayAndProgressIsNotNullAndUserId(

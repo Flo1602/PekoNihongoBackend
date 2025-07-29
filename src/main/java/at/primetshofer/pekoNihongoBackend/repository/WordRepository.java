@@ -23,4 +23,21 @@ public interface WordRepository extends JpaRepository<Word, Long> {
 
     @Query("SELECT w FROM Word w WHERE w.user.id = :userId AND w.kanjis IS NOT EMPTY ORDER BY function('RAND')")
     List<Word> findRandomItemsWithKanji(@Param("userId") Long userId, Limit limit);
+
+    @Query("""
+        SELECT w FROM Word w
+        WHERE w.user.id = :userId
+          AND (
+            LOWER(w.japanese) LIKE :japanese
+            OR LOWER(w.kana) LIKE :kana
+            OR LOWER(w.english) LIKE :english
+          )
+        """)
+    Page<Word> searchByUserIdAndFields(
+            @Param("userId") Long userId,
+            @Param("japanese") String japanese,
+            @Param("kana") String kana,
+            @Param("english") String english,
+            Pageable pageable
+    );
 }
