@@ -40,4 +40,6 @@ public interface WordRepository extends JpaRepository<Word, Long> {
             @Param("english") String english,
             Pageable pageable
     );
+
+    int countWordsByUserId(Long userId);
 }

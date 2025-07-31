@@ -1,14 +1,16 @@
 package at.primetshofer.pekoNihongoBackend.web;
 
+import at.primetshofer.pekoNihongoBackend.dto.AllStatsDto;
 import at.primetshofer.pekoNihongoBackend.dto.StatsDto;
+import at.primetshofer.pekoNihongoBackend.entity.LearnTimeStats;
 import at.primetshofer.pekoNihongoBackend.security.authentication.AuthConstants;
 import at.primetshofer.pekoNihongoBackend.service.StatsService;
 import at.primetshofer.pekoNihongoBackend.utils.WebUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Duration;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/stats")
@@ -21,6 +23,24 @@ public class StatsController {
     public StatsController(WebUtils webUtils, StatsService statsService) {
         this.webUtils = webUtils;
         this.statsService = statsService;
+    }
+
+    @GetMapping
+    public AllStatsDto getAllStats(@RequestParam int count) {
+        Long userId = webUtils.getCurrentUserId();
+
+        int kanjiCount = statsService.getKanjiCount(userId);
+        int wordCount = statsService.getWordCount(userId);
+        Duration totalLearnTime = statsService.getTotalLearnTime(userId);
+        int totalExercises = statsService.getTotalExercises(userId);
+        List<LearnTimeStats> lastStats = statsService.getLastStats(count, userId);
+        List<StatsDto> lastStatsDto = lastStats.stream().map(stat -> new StatsDto(
+                stat.getDate(),
+                stat.getDuration(),
+                stat.getExercises())
+        ).toList();
+
+        return new AllStatsDto(kanjiCount, wordCount, totalLearnTime, totalExercises, lastStatsDto);
     }
 
     @PostMapping
