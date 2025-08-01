@@ -19,10 +19,8 @@ public class BackupService {
 
     private static final Logger logger = LoggerFactory.getLogger(BackupService.class);
 
-    @Value("${pekoNihongoBackend.resources.location}")
-    private String staticResourceLocation;
-
-    private static final String BACKUP_DIR = "/DB_Backup";
+    @Value("${pekoNihongoBackend.dbBackup.location}")
+    private String dbBackupLocation;
 
     private final String dbUrl;
     private final String dbUser;
@@ -46,9 +44,9 @@ public class BackupService {
 
     private void checkAndBackup() {
 
-        final File backupDir = new File(staticResourceLocation + BACKUP_DIR);
+        final File backupDir = new File(dbBackupLocation);
         if (!backupDir.exists() && !backupDir.mkdirs()) {
-            logger.error("Konnte Backup-Verzeichnis nicht anlegen: {}", staticResourceLocation + BACKUP_DIR);
+            logger.error("Konnte Backup-Verzeichnis nicht anlegen: {}", dbBackupLocation);
             return;
         }
 
@@ -125,7 +123,7 @@ public class BackupService {
 
     private void cleanupBackups() {
 
-        final File backupDir = new File(staticResourceLocation + BACKUP_DIR);
+        final File backupDir = new File(dbBackupLocation);
         final File[] files = backupDir.listFiles((dir, name) ->
                 name.matches("backup-\\d{4}-\\d{2}-\\d{2}\\.sql\\.gz"));
 

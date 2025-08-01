@@ -15,6 +15,10 @@ RUN ./mvnw -B package -DskipTests           # produces target/*.jar
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install -y default-mysql-client \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy only the built JAR (adjust the name if your artefact differs)
 COPY --from=build /workspace/target/*.jar app.jar
 
