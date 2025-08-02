@@ -89,6 +89,16 @@ public class WordService {
         return wordRepository.findAllByUserId(userId, pageable);
     }
 
+    public Page<Word> getWordsKanjiFilter(int pageSize, int page, Long userId, String kanjiFilter) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+
+        String regex = "[" + kanjiFilter + "]";
+
+        return wordRepository.searchByUserIdAndKanjiList(userId, regex, pageable);
+
+    }
+
     public List<Word> getRandomWordsWithKanji(int count, Long currentUserId) {
         return wordRepository.findRandomItemsWithKanji(currentUserId, Limit.of(count));
     }

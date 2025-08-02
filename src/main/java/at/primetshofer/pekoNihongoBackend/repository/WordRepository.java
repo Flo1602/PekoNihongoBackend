@@ -41,5 +41,12 @@ public interface WordRepository extends JpaRepository<Word, Long> {
             Pageable pageable
     );
 
+    @Query(value = "SELECT * FROM word w WHERE w.user_id = :userId AND w.japanese REGEXP :kanjiRegex", nativeQuery = true)
+    Page<Word> searchByUserIdAndKanjiList(
+            @Param("userId") Long userId,
+            @Param("kanjiRegex") String kanjiRegex,
+            Pageable pageable
+    );
+
     int countWordsByUserId(Long userId);
 }

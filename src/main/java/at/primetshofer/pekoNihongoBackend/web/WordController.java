@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/words")
 @SecurityRequirement(name = AuthConstants.SECURITY_SCHEME_NAME)
@@ -25,8 +27,18 @@ public class WordController {
     }
 
     @GetMapping
-    public PageDto<WordDto> get(@RequestParam int pageSize, @RequestParam int page, @RequestParam(required = false) String search) {
-        Page<Word> wordPage = wordService.getWords(pageSize, page, webUtils.getCurrentUserId(), search == null ? "" : search.trim());
+    public PageDto<WordDto> get(@RequestParam int pageSize,
+                                @RequestParam int page,
+                                @RequestParam(required = false) String search,
+                                @RequestParam(required = false) String kanjiFilter) {
+        Page<Word> wordPage;
+
+        if(kanjiFilter != null && !kanjiFilter.isBlank()) {
+            wordPage = wordService.getWordsKanjiFilter(pageSize, page, webUtils.getCurrentUserId(), kanjiFilter);
+        } else {
+            wordPage = wordService.getWords(pageSize, page, webUtils.getCurrentUserId(), search == null ? "" : search.trim());
+        }
+
 
         return new PageDto<>(wordPage.getContent().stream().map(WordDto::new).toList(), wordPage.getTotalPages());
     }
