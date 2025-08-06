@@ -34,3 +34,4 @@ build/
 /data/data.mv.db
 /data/data.trace.db
 /resources/
+/DB_Backup/

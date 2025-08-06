@@ -73,8 +73,10 @@ public class KanjiLearnController {
             correct += progress.correct() ? 1 : 0;
         }
 
-        correct /= progresses.size();
         correct *= 100;
+        correct /= progresses.size();
+
+        if(correct == 100) correct = 200;
 
         User user = webUtils.getCurrentUser();
 

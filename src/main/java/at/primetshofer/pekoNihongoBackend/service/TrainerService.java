@@ -83,11 +83,6 @@ public class TrainerService {
             updatedProgress.setLearnedDays(0);
         }
 
-        if (!isToday(updatedProgress.getLastLearned())){
-            updatedProgress.setPoints(0);
-            updatedProgress.setLearnedDays(updatedProgress.getLearnedDays() + 1);
-        }
-
         updatedProgress.setPoints(calculateNewPoints(updatedProgress, percentage));
 
         int intervalDays = getIntervalDays(updatedProgress.getPoints());
@@ -106,6 +101,12 @@ public class TrainerService {
 
     private int calculateNewPoints(Progress progress, int percentage) {
         int pointsIncrement = calculatePointsIncrement(progress, percentage);
+
+        if (!isToday(progress.getLastLearned())){
+            progress.setPoints(0);
+            progress.setLearnedDays(progress.getLearnedDays() + 1);
+        }
+
         int newPoints = progress.getPoints() + pointsIncrement;
         int maxPoints = getDynamicMaxPoints(progress);
 
@@ -118,7 +119,9 @@ public class TrainerService {
 
     private int calculatePointsIncrement(Progress progress, int percentage) {
         int baseIncrement;
-        if (percentage >= 95) {
+        if (percentage >= 200) {
+            baseIncrement = 35;
+        } else if (percentage >= 95) {
             baseIncrement = 25;
         } else if (percentage >= 80) {
             baseIncrement = 15;
