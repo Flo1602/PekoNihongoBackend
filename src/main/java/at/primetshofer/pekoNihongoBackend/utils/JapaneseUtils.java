@@ -1,5 +1,8 @@
 package at.primetshofer.pekoNihongoBackend.utils;
 
+import com.atilika.kuromoji.ipadic.Token;
+import com.atilika.kuromoji.ipadic.Tokenizer;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,4 +24,25 @@ public class JapaneseUtils {
         return kanjiList;
     }
 
+    public static String convertKanjiToKatakana(String text) {
+        Tokenizer tokenizer = new Tokenizer();
+        StringBuilder hiraganaResult = new StringBuilder();
+
+        for (Token token : tokenizer.tokenize(text)) {
+            String reading = token.getReading();
+            if (reading != null) {
+                // Convert Katakana reading to Hiragana
+                StringBuilder katakana = new StringBuilder();
+                for (char c : reading.toCharArray()) {
+                    katakana.append(c);
+                }
+                hiraganaResult.append(katakana);
+            } else {
+                // If no reading is available, use the surface form
+                hiraganaResult.append(token.getSurface());
+            }
+        }
+
+        return hiraganaResult.toString();
+    }
 }

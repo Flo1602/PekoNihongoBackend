@@ -45,6 +45,13 @@ public class WordLearnController {
         return words.stream().map(WordDto::new).toList();
     }
 
+    @GetMapping("/random")
+    public List<WordDto> getRandomWords(@RequestParam int count) {
+        User user = webUtils.getCurrentUser();
+
+        return wordService.getRandomWordsWithKanji(count, user.getId()).stream().map(WordDto::new).toList();
+    }
+
     @PostMapping
     public void saveProgress(@RequestBody List<ProgressDto> progresses) {
         User user = webUtils.getCurrentUser();
