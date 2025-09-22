@@ -26,23 +26,22 @@ public class JapaneseUtils {
 
     public static String convertKanjiToKatakana(String text) {
         Tokenizer tokenizer = new Tokenizer();
-        StringBuilder hiraganaResult = new StringBuilder();
+        StringBuilder katakanaResult = new StringBuilder();
 
         for (Token token : tokenizer.tokenize(text)) {
             String reading = token.getReading();
             if (reading != null) {
-                // Convert Katakana reading to Hiragana
                 StringBuilder katakana = new StringBuilder();
                 for (char c : reading.toCharArray()) {
                     katakana.append(c);
                 }
-                hiraganaResult.append(katakana);
+                katakanaResult.append(katakana);
             } else {
                 // If no reading is available, use the surface form
-                hiraganaResult.append(token.getSurface());
+                katakanaResult.append(token.getSurface());
             }
         }
 
-        return hiraganaResult.toString();
+        return katakanaResult.toString();
     }
 }

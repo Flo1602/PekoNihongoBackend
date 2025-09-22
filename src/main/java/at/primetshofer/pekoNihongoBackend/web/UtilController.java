@@ -23,10 +23,10 @@ public class UtilController {
     @GetMapping("/japaneseSimilarity")
     public Integer getJapaneseSimilarity(@RequestParam String word, @RequestParam String wordKana) {
         wordKana = wordKana.trim();
-        String shot = word.trim().replace("これは", "").replace("です", "");
-        String romaji = KanaToRomajiConverter.katakanaToRomaji(JapaneseUtils.convertKanjiToKatakana(shot));
+        word = word.trim().replace("これは", "").replace("です", "");
+        String romaji = KanaToRomajiConverter.katakanaToRomaji(JapaneseUtils.convertKanjiToKatakana(word));
         if (romaji.isEmpty() || romaji.equals("*")) {
-            romaji = KanaToRomajiConverter.katakanaToRomaji(shot);
+            romaji = KanaToRomajiConverter.katakanaToRomaji(word);
         }
 
         String romajiFromHiragana = KanaToRomajiConverter.hiraganaToRomaji(wordKana);
@@ -34,9 +34,9 @@ public class UtilController {
 
         double similarity1 = StringSimilarity.calculateSimilarity(romaji, romajiFromHiragana);
         double similarity2 = StringSimilarity.calculateSimilarity(romaji, romajiFromKatakana);
-        double similarity3 = StringSimilarity.calculateSimilarity(shot, wordKana);
+        double similarity3 = StringSimilarity.calculateSimilarity(word, wordKana);
 
-        logger.info("Similarity 1: " + similarity1 + ", Similarity 2: " + similarity2 + ", Similarity 2: " + similarity3);
+        logger.info("Similarity 1: " + similarity1 + ", Similarity 2: " + similarity2 + ", Similarity 3: " + similarity3);
 
         if(similarity1 > similarity2 && similarity1 > similarity3) {
             return (int) (similarity1);
