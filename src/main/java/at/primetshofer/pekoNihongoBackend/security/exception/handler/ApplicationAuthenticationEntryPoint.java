@@ -2,6 +2,8 @@ package at.primetshofer.pekoNihongoBackend.security.exception.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,8 @@ import java.io.IOException;
 @Component
 public class ApplicationAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
+    private static final Logger logger = LoggerFactory.getLogger(ApplicationAuthenticationEntryPoint.class);
+
     @Override
     public void commence(
             HttpServletRequest request,
@@ -18,14 +22,14 @@ public class ApplicationAuthenticationEntryPoint implements AuthenticationEntryP
             AuthenticationException authException)
             throws IOException {
 
-        //log.error("Authentication exception occurred for request: {}", request, authException);
-        System.out.println("Authentication exception occurred for request: " + request);
+        final String requestUri = request.getRequestURI();
+        final String message = authException.getMessage() != null
+                ? authException.getMessage()
+                : "Unauthorized";
 
-        //ApiErrorResponse apiErrorResponse = new ApiErrorResponse(authException.getMessage());
+        logger.warn("Unauthorized access to [{}]: {}", requestUri, message, authException);
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        //response.setContentType("application/json");
-        //objectMapper.writeValue(response.getOutputStream(), apiErrorResponse);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
     }
 
 }
