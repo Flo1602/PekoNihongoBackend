@@ -102,4 +102,10 @@ public class WordService {
     public List<Word> getRandomWordsWithKanji(int count, Long currentUserId) {
         return wordRepository.findRandomItemsWithKanji(currentUserId, Limit.of(count));
     }
+
+    public boolean isWordInVocabs(String word, Long userId){
+        List<Word> result = wordRepository.findAllByUserIdAndJapanese(userId, word);
+
+        return !result.isEmpty();
+    }
 }

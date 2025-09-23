@@ -1,9 +1,10 @@
 package at.primetshofer.pekoNihongoBackend.utils;
 
+import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class KanaToRomajiConverter {
+public class KanaConverter {
 
     // Katakana to Romaji map
     private static final Map<String, String> KATAKANA_TO_ROMAJI = new HashMap<>();
@@ -149,5 +150,74 @@ public class KanaToRomajiConverter {
             romaji.append(kanaToRomajiMap.getOrDefault(currentChar, currentChar));
         }
         return romaji.toString();
+    }
+
+    public static String katakanaToHiragana(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        // Normalize: converts halfwidth katakana to fullwidth, composes characters
+        String s = Normalizer.normalize(input, Normalizer.Form.NFKC);
+        StringBuilder out = new StringBuilder(s.length());
+
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+
+            // Basic Katakana block that maps cleanly by -0x60
+            if (ch >= '\u30A1' && ch <= '\u30F6') {
+                out.append((char) (ch - 0x60));
+                continue;
+            }
+
+            // Iteration marks ヽ (30FD), ヾ (30FE) → ゝ (309D), ゞ (309E)
+            if (ch == '\u30FD' || ch == '\u30FE') {
+                out.append((char) (ch - 0x60));
+                continue;
+            }
+
+            // Rare VA/VI/VE/VO letters: ヷ/ヸ/ヹ/ヺ → わ゙/ゐ゙/ゑ゙/を゙ (base + combining dakuten)
+            if (ch == '\u30F7') { out.append("わ\u3099"); continue; }
+            if (ch == '\u30F8') { out.append("ゐ\u3099"); continue; }
+            if (ch == '\u30F9') { out.append("ゑ\u3099"); continue; }
+            if (ch == '\u30FA') { out.append("を\u3099"); continue; }
+
+            // Long vowel mark: keep as is (commonly used in kana loanwords)
+            if (ch == '\u30FC') { out.append(ch); continue; }
+
+            // Everything else: leave unchanged
+            out.append(ch);
+        }
+        return out.toString();
+    }
+
+    /**
+     * Convert Hiragana in the input to Katakana.
+     * Leaves other characters unchanged. Provided for symmetry.
+     */
+    public static String hiraganaToKatakana(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        String s = Normalizer.normalize(input, Normalizer.Form.NFKC);
+        StringBuilder out = new StringBuilder(s.length());
+
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+
+            // Basic Hiragana block that maps cleanly by +0x60
+            if (ch >= '\u3041' && ch <= '\u3096') {
+                out.append((char) (ch + 0x60));
+                continue;
+            }
+
+            // Iteration marks ゝ (309D), ゞ (309E) → ヽ (30FD), ヾ (30FE)
+            if (ch == '\u309D' || ch == '\u309E') {
+                out.append((char) (ch + 0x60));
+                continue;
+            }
+
+            // Combining dakuten/handakuten on hiragana base will carry over visually after normalization,
+            // and long vowel mark stays as is.
+            out.append(ch);
+        }
+        return out.toString();
     }
 }

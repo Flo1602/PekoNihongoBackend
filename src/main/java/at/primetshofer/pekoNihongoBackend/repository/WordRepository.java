@@ -49,4 +49,6 @@ public interface WordRepository extends JpaRepository<Word, Long> {
     );
 
     int countWordsByUserId(Long userId);
+
+    List<Word> findAllByUserIdAndJapanese(Long userId, String japanese);
 }

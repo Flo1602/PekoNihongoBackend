@@ -2,6 +2,7 @@ package at.primetshofer.pekoNihongoBackend.web;
 
 import at.primetshofer.pekoNihongoBackend.dto.PageDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordDto;
+import at.primetshofer.pekoNihongoBackend.dto.WordInfoDto;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.WordDraft;
 import at.primetshofer.pekoNihongoBackend.security.authentication.AuthConstants;
@@ -64,7 +65,12 @@ public class WordDraftController {
     }
 
     @GetMapping("/search")
-    public List<WordDto> searchJisho(@RequestParam String search) {
-        return wordDraftService.searchWordOnJisho(search, 3);
+    public List<WordDto> searchJisho(@RequestParam String search, @RequestParam(required = false) Boolean convertToKana) {
+        return wordDraftService.searchWordOnJisho(search, 3, convertToKana);
+    }
+
+    @GetMapping("/{id}/info")
+    public WordInfoDto getWordInfo(@PathVariable Long id) {
+        return wordDraftService.getWordInfo(id, webUtils.getCurrentUserId());
     }
 }

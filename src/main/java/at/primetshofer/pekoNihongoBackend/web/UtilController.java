@@ -1,9 +1,8 @@
 package at.primetshofer.pekoNihongoBackend.web;
 
-import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.security.authentication.AuthConstants;
 import at.primetshofer.pekoNihongoBackend.utils.JapaneseUtils;
-import at.primetshofer.pekoNihongoBackend.utils.KanaToRomajiConverter;
+import at.primetshofer.pekoNihongoBackend.utils.KanaConverter;
 import at.primetshofer.pekoNihongoBackend.utils.StringSimilarity;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.slf4j.Logger;
@@ -24,13 +23,13 @@ public class UtilController {
     public Integer getJapaneseSimilarity(@RequestParam String word, @RequestParam String wordKana) {
         wordKana = wordKana.trim();
         word = word.trim().replace("これは", "").replace("です", "");
-        String romaji = KanaToRomajiConverter.katakanaToRomaji(JapaneseUtils.convertKanjiToKatakana(word));
+        String romaji = KanaConverter.katakanaToRomaji(JapaneseUtils.convertKanjiToKatakana(word));
         if (romaji.isEmpty() || romaji.equals("*")) {
-            romaji = KanaToRomajiConverter.katakanaToRomaji(word);
+            romaji = KanaConverter.katakanaToRomaji(word);
         }
 
-        String romajiFromHiragana = KanaToRomajiConverter.hiraganaToRomaji(wordKana);
-        String romajiFromKatakana = KanaToRomajiConverter.katakanaToRomaji(wordKana);
+        String romajiFromHiragana = KanaConverter.hiraganaToRomaji(wordKana);
+        String romajiFromKatakana = KanaConverter.katakanaToRomaji(wordKana);
 
         double similarity1 = StringSimilarity.calculateSimilarity(romaji, romajiFromHiragana);
         double similarity2 = StringSimilarity.calculateSimilarity(romaji, romajiFromKatakana);

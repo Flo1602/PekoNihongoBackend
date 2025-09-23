@@ -23,4 +23,6 @@ public interface KanjiRepository extends JpaRepository<Kanji, Long> {
     Kanji findByUserIdAndId(Long userId, Long id);
 
     int countKanjiByUserId(Long userId);
+
+    List<Kanji> findAllByUserIdAndSymbol(Long userId, char symbol);
 }

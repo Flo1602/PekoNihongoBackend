@@ -94,4 +94,10 @@ public class KanjiService {
         kanjiRepository.deleteById(id);
         return true;
     }
+
+    public boolean isKanjiInVocabs(char symbol, Long userId){
+        List<Kanji> result = kanjiRepository.findAllByUserIdAndSymbol(userId, symbol);
+
+        return !result.isEmpty();
+    }
 }
