@@ -109,6 +109,7 @@ public class WordDraftService {
     }
 
     public List<WordDto> searchWordOnJisho(String search, int resultCount, Boolean convertToKana){
+        search = search.toLowerCase().trim();
         if(convertToKana != null && convertToKana){
             search = KanaConverter.katakanaToHiragana(JapaneseUtils.convertKanjiToKatakana(search));
         }
