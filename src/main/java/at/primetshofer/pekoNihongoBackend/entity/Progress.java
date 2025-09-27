@@ -19,7 +19,7 @@ public class Progress {
 
     private Integer learnedDays;
 
-    private Integer negativeDays;
+    private Integer penalty;
 
     public Boolean getDueToday() {
         return isDueToday;
@@ -61,12 +61,15 @@ public class Progress {
         this.learnedDays = learnedDays;
     }
 
-    public Integer getNegativeDays() {
-        return negativeDays;
+    public Integer getPenalty() {
+        if(penalty == null) penalty = 0;
+        return penalty;
     }
 
-    public void setNegativeDays(Integer negativeDays) {
-        this.negativeDays = negativeDays;
+    public void setPenalty(Integer penalty) {
+        if(penalty < 0) penalty = 0;
+        if(penalty > 90) penalty = 90;
+        this.penalty = penalty;
     }
 
     public LocalDate getFirstLearned() {

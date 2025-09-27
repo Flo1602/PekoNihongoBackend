@@ -7,6 +7,7 @@ import at.primetshofer.pekoNihongoBackend.entity.Progress;
 import at.primetshofer.pekoNihongoBackend.repository.IProgressRepository;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,8 +19,8 @@ import java.util.List;
 @Service
 public class TrainerService {
 
-    public <T extends Learnable> long getDueElementsCount(IProgressRepository<T> progressRepository, Long userId, int maxElements){
-        if(maxElements <= 0) {
+    public <T extends Learnable> long getDueElementsCount(IProgressRepository<T> progressRepository, Long userId, int maxElements) {
+        if (maxElements <= 0) {
             maxElements = Integer.MAX_VALUE;
         }
         long dueCount = progressRepository.countByUserIdAndProgress_NextDueDateLessThanEqualOrUserIdAndProgress_IsDueTodayOrUserIdAndProgressIsNull(
@@ -32,7 +33,7 @@ public class TrainerService {
         return Math.min(maxElements, dueCount);
     }
 
-    public <T extends Learnable> long getCompletedToday(IProgressRepository<T> progressRepository, Long userId){
+    public <T extends Learnable> long getCompletedToday(IProgressRepository<T> progressRepository, Long userId) {
         return progressRepository.countByProgress_LastLearnedAndProgress_IsDueTodayAndProgressIsNotNullAndUserId(
                 LocalDate.now(),
                 false,
@@ -41,19 +42,27 @@ public class TrainerService {
         );
     }
 
-    public <T extends Learnable> List<T> getDueElements(IProgressRepository<T> progressRepository, int elementsToGet, Long userId, int maxElements){
+    public <T extends Learnable> List<T> getDueElements(IProgressRepository<T> progressRepository, int elementsToGet, Long userId, int maxElements) {
         long finishedLearning = getCompletedToday(progressRepository, userId);
-        int getCount = maxElements - (int)finishedLearning;
+        int getCount = maxElements - (int) finishedLearning;
 
-        if(getCount <= 0) {
+        if (getCount <= 0) {
             return List.of();
         }
 
-        Sort.Order orderIsDueTodayDesc = new Sort.Order(Sort.Direction.DESC, "progress.isDueToday").nullsFirst();
+        //Sort.Order orderIsDueTodayDesc = new Sort.Order(Sort.Direction.DESC, "progress.isDueToday").nullsFirst();
 
-        Sort.Order orderIdDesc = new Sort.Order(Sort.Direction.DESC, "id");
+        //Sort.Order orderIdDesc = new Sort.Order(Sort.Direction.DESC, "id");
 
-        Sort sort = Sort.by(orderIsDueTodayDesc, orderIdDesc);
+        //Sort sort = Sort.by(orderIsDueTodayDesc, orderIdDesc);
+
+        Sort sort = JpaSort.unsafe("CASE " +
+                        "WHEN progress.isDueToday IS TRUE THEN 0 " +
+                        "WHEN progress.isDueToday IS NULL THEN 1 " +
+                        "ELSE 2 END")
+                .ascending()
+                .and(Sort.by(Sort.Order.desc("id")));
+
         Limit limit = Limit.of(getCount);
 
         List<T> dueElements = progressRepository.findAllByUserIdAndProgress_NextDueDateLessThanEqualOrUserIdAndProgress_IsDueTodayOrUserIdAndProgressIsNull(
@@ -67,7 +76,7 @@ public class TrainerService {
 
         Collections.shuffle(dueElements);
 
-        if(elementsToGet > dueElements.size()) {
+        if (elementsToGet > dueElements.size()) {
             return dueElements;
         }
 
@@ -77,12 +86,14 @@ public class TrainerService {
     public <T extends Learnable> void saveProgress(T t, IProgressRepository<T> progressRepository, int percentage) {
         Progress updatedProgress = t.getProgress();
 
-        if(updatedProgress == null) {
+        if (updatedProgress == null) {
             updatedProgress = new Progress();
             updatedProgress.setFirstLearned(LocalDate.now());
             updatedProgress.setLearnedDays(0);
+            updatedProgress.setPenalty(0);
         }
 
+        updatedProgress.setPenalty(calculateNewPenalty(updatedProgress, percentage));
         updatedProgress.setPoints(calculateNewPoints(updatedProgress, percentage));
 
         int intervalDays = getIntervalDays(updatedProgress.getPoints());
@@ -99,10 +110,31 @@ public class TrainerService {
         progressRepository.save(t);
     }
 
+    private int calculateNewPenalty(Progress progress, int percentage) {
+        int dynamicMaxPoints = getDynamicMaxPoints(progress);
+        int penaltyIncrease = getPenaltyIncrease(dynamicMaxPoints, percentage);
+        int penalty = progress.getPenalty() + penaltyIncrease;
+
+        if (percentage == 100 && !isToday(progress.getLastLearned())) {
+            penalty -= 2 * getPenaltyIncrease(dynamicMaxPoints, 0);
+        }
+
+        if (penalty < 0) {
+            penalty = 0;
+        }
+        if (penalty > 90) {
+            penalty = 90;
+        }
+
+        return penalty;
+    }
+
     private int calculateNewPoints(Progress progress, int percentage) {
         int pointsIncrement = calculatePointsIncrement(progress, percentage);
 
-        if (!isToday(progress.getLastLearned())){
+        pointsIncrement = (int) (pointsIncrement * getPenalty(progress));
+
+        if (!isToday(progress.getLastLearned())) {
             progress.setPoints(0);
             progress.setLearnedDays(progress.getLearnedDays() + 1);
         }
@@ -110,11 +142,15 @@ public class TrainerService {
         int newPoints = progress.getPoints() + pointsIncrement;
         int maxPoints = getDynamicMaxPoints(progress);
 
-        if(newPoints > maxPoints) {
+        if (newPoints > maxPoints) {
             newPoints = maxPoints;
         }
 
         return newPoints;
+    }
+
+    private double getPenalty(Progress progress) {
+        return (100.0 - progress.getPenalty()) / 100.0;
     }
 
     private int calculatePointsIncrement(Progress progress, int percentage) {
@@ -170,6 +206,7 @@ public class TrainerService {
         daysSinceFirstLearned /= 4;
 
         int dynamicMax = (int) Math.min((daysSinceFirstLearned + reviewCount) * 20, 600);
+        dynamicMax = (int) (dynamicMax * getPenalty(progress));
         if (dynamicMax < 0) {
             dynamicMax = 600;
         }
@@ -196,6 +233,35 @@ public class TrainerService {
         } else {
             return 31;
         }
+    }
+
+    private int getPenaltyIncrease(int maxPoints, int percentage) {
+        if (percentage == 100) {
+            return 0;
+        }
+
+        int basePenalty;
+        if (maxPoints < 60) {
+            basePenalty = 5;
+        } else if (maxPoints < 100) {
+            basePenalty = 7;
+        } else if (maxPoints < 175) {
+            basePenalty = 10;
+        } else if (maxPoints < 300) {
+            basePenalty = 20;
+        } else if (maxPoints < 500) {
+            basePenalty = 30;
+        } else {
+            basePenalty = 50;
+        }
+
+        int penaltyIncrease = (int) Math.round(basePenalty * ((100 - percentage) / 100.0));
+
+        if (penaltyIncrease < 0) {
+            penaltyIncrease = 0;
+        }
+
+        return penaltyIncrease;
     }
 
     private boolean isToday(LocalDate date) {
