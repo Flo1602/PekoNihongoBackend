@@ -4,10 +4,7 @@ import at.primetshofer.pekoNihongoBackend.dto.KanjiLearningDto;
 import at.primetshofer.pekoNihongoBackend.dto.ProgressDataDto;
 import at.primetshofer.pekoNihongoBackend.dto.ProgressDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordDto;
-import at.primetshofer.pekoNihongoBackend.entity.Kanji;
-import at.primetshofer.pekoNihongoBackend.entity.Progress;
-import at.primetshofer.pekoNihongoBackend.entity.User;
-import at.primetshofer.pekoNihongoBackend.entity.Word;
+import at.primetshofer.pekoNihongoBackend.entity.*;
 import at.primetshofer.pekoNihongoBackend.repository.KanjiProgressRepository;
 import at.primetshofer.pekoNihongoBackend.security.authentication.AuthConstants;
 import at.primetshofer.pekoNihongoBackend.service.KanjiService;
@@ -83,12 +80,14 @@ public class KanjiLearnController {
         Kanji kanji = kanjiService.getById(id, user.getId());
 
         trainerService.saveProgress(kanji, kanjiProgressRepository, correct);
+
+        trainerService.updateQuestProgress(kanjiProgressRepository, user.getId(), user.getUserSettings().getMaxDailyKanji(), QuestType.DAILY_KANJI);
     }
 
     @GetMapping("/progress")
     public ProgressDataDto getDueCount() {
         User user = webUtils.getCurrentUser();
 
-        return trainerService.ProgressDataDto(kanjiProgressRepository, user.getId(), user.getUserSettings().getMaxDailyKanji());
+        return trainerService.progressDataDto(kanjiProgressRepository, user.getId(), user.getUserSettings().getMaxDailyKanji());
     }
 }

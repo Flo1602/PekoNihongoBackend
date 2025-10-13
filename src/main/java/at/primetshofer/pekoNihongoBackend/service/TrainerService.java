@@ -4,6 +4,7 @@ import at.primetshofer.pekoNihongoBackend.dto.ProgressDataDto;
 import at.primetshofer.pekoNihongoBackend.dto.japneseLearningApp.OldProgressDto;
 import at.primetshofer.pekoNihongoBackend.entity.Learnable;
 import at.primetshofer.pekoNihongoBackend.entity.Progress;
+import at.primetshofer.pekoNihongoBackend.entity.QuestType;
 import at.primetshofer.pekoNihongoBackend.repository.IProgressRepository;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
@@ -18,6 +19,12 @@ import java.util.List;
 
 @Service
 public class TrainerService {
+
+    private final QuestService questService;
+
+    public TrainerService(QuestService questService) {
+        this.questService = questService;
+    }
 
     public <T extends Learnable> long getDueElementsCount(IProgressRepository<T> progressRepository, Long userId, int maxElements) {
         if (maxElements <= 0) {
@@ -286,11 +293,16 @@ public class TrainerService {
         progressRepository.save(t);
     }
 
-    public <T extends Learnable> ProgressDataDto ProgressDataDto(IProgressRepository<T> progressRepository, Long userId, int maxElements) {
+    public <T extends Learnable> ProgressDataDto progressDataDto(IProgressRepository<T> progressRepository, Long userId, int maxElements) {
         long dueToday = getDueElementsCount(progressRepository, userId, maxElements);
         long dueTotal = getDueElementsCount(progressRepository, userId, -1);
         long completedToday = getCompletedToday(progressRepository, userId);
 
         return new ProgressDataDto(dueToday, completedToday, dueTotal);
+    }
+
+    public <T extends Learnable> void updateQuestProgress(IProgressRepository<T> progressRepository, Long userId, int maxElements, QuestType type){
+        ProgressDataDto progressDataDto = progressDataDto(progressRepository, userId, maxElements);
+        questService.increaseAndUpdateQuestProgress(userId, type, (int)progressDataDto.completedToday(), maxElements);
     }
 }

@@ -19,11 +19,13 @@ public class StatsService {
     private final LearnTimeStatsRepository statsRepository;
     private final KanjiRepository kanjiRepository;
     private final WordRepository wordRepository;
+    private final QuestService questionService;
 
-    public StatsService(LearnTimeStatsRepository statsRepository, KanjiRepository kanjiRepository, WordRepository wordRepository) {
+    public StatsService(LearnTimeStatsRepository statsRepository, KanjiRepository kanjiRepository, WordRepository wordRepository, QuestService questionService) {
         this.statsRepository = statsRepository;
         this.kanjiRepository = kanjiRepository;
         this.wordRepository = wordRepository;
+        this.questionService = questionService;
     }
 
     public void addStat(Duration duration, User user) {
@@ -31,12 +33,18 @@ public class StatsService {
 
         LearnTimeStats currStat = statsRepository.findByUserIdAndDate(user.getId(), today);
 
+        if(duration.isZero() && currStat != null) return;
+
         if(currStat == null){
             currStat = new LearnTimeStats();
             currStat.setDuration(duration);
             currStat.setDate(today);
-            currStat.setExercises(1);
+            currStat.setExercises((duration.isZero()) ? 0 : 1);
             currStat.setUser(user);
+
+            if(duration.isZero()){
+                questionService.resetAllDailyQuests(user.getId());
+            }
         } else {
             currStat.setDuration(currStat.getDuration().plus(duration));
             currStat.setExercises(currStat.getExercises() + 1);

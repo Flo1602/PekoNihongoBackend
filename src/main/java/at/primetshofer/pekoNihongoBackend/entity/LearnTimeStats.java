@@ -26,6 +26,10 @@ public class LearnTimeStats {
     @Column(nullable = false)
     private Duration duration;
 
+    private int exercises;
+
+    private Integer streak;
+
     public LearnTimeStats() {
     }
 
@@ -34,8 +38,6 @@ public class LearnTimeStats {
         this.duration = duration;
         this.exercises = exercises;
     }
-
-    private int exercises;
 
     public Long getId() {
         return id;
@@ -75,5 +77,13 @@ public class LearnTimeStats {
 
     public void setExercises(int exercises) {
         this.exercises = exercises;
+    }
+
+    public Integer getStreak() {
+        return streak;
+    }
+
+    public void setStreak(Integer streak) {
+        this.streak = streak;
     }
 }

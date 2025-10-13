@@ -3,6 +3,7 @@ package at.primetshofer.pekoNihongoBackend.web.learning;
 import at.primetshofer.pekoNihongoBackend.dto.ProgressDataDto;
 import at.primetshofer.pekoNihongoBackend.dto.ProgressDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordDto;
+import at.primetshofer.pekoNihongoBackend.entity.QuestType;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.repository.WordProgressRepository;
@@ -71,13 +72,15 @@ public class WordLearnController {
         wordResult.forEach((word, percent) ->
                 trainerService.saveProgress(word, wordProgressRepository, percent)
         );
+
+        trainerService.updateQuestProgress(wordProgressRepository, user.getId(), user.getUserSettings().getMaxDailyWords(), QuestType.DAILY_WORDS);
     }
 
     @GetMapping("/progress")
     public ProgressDataDto getDueCount() {
         User user = webUtils.getCurrentUser();
 
-        return trainerService.ProgressDataDto(wordProgressRepository, user.getId(), user.getUserSettings().getMaxDailyWords());
+        return trainerService.progressDataDto(wordProgressRepository, user.getId(), user.getUserSettings().getMaxDailyWords());
     }
 
 }

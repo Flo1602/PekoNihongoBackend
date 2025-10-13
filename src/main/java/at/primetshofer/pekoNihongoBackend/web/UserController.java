@@ -7,12 +7,14 @@ import at.primetshofer.pekoNihongoBackend.security.exception.ApplicationAuthenti
 import at.primetshofer.pekoNihongoBackend.security.user.AuthUser;
 import at.primetshofer.pekoNihongoBackend.security.user.Role;
 import at.primetshofer.pekoNihongoBackend.service.AuthenticationService;
+import at.primetshofer.pekoNihongoBackend.service.StatsService;
 import at.primetshofer.pekoNihongoBackend.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -22,17 +24,27 @@ public class UserController {
 
     private final UserService userService;
     private final AuthenticationService authenticationService;
+    private final StatsService statsService;
 
-    public UserController(UserService userService, AuthenticationService authenticationService) {
+    public UserController(UserService userService, AuthenticationService authenticationService, StatsService statsService) {
         this.userService = userService;
         this.authenticationService = authenticationService;
+        this.statsService = statsService;
     }
 
-    @GetMapping("/currentUser")
-    public UserDto get() {
+    @GetMapping("/autoLogin")
+    public boolean autoLogin() {
+        if(SecurityContextHolder.getContext().getAuthentication() == null){
+            return false;
+        }
         AuthUser authUser = (AuthUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(authUser == null) {
+            return false;
+        }
 
-        return new UserDto(userService.getUserById(authUser.userId()));
+        statsService.addStat(Duration.ZERO, userService.getUserById(authUser.userId()));
+
+        return true;
     }
 
     @GetMapping

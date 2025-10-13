@@ -68,6 +68,7 @@ public class WordService {
         audioService.deleteAudioFile(word.get());
 
         wordRepository.deleteById(wordId);
+
         return true;
     }
 

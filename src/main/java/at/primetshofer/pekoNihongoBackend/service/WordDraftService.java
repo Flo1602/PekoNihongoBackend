@@ -3,6 +3,7 @@ package at.primetshofer.pekoNihongoBackend.service;
 import at.primetshofer.pekoNihongoBackend.dto.KanjiInfoDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordInfoDto;
+import at.primetshofer.pekoNihongoBackend.entity.QuestType;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.entity.WordDraft;
@@ -36,15 +37,23 @@ public class WordDraftService {
     private final WordDraftRepository wordDraftRepository;
     private final WordService wordService;
     private final KanjiService kanjiService;
+    private final QuestService questService;
 
-    public WordDraftService(WordDraftRepository wordDraftRepository, WordService wordService, KanjiService kanjiService) {
+    public WordDraftService(WordDraftRepository wordDraftRepository, WordService wordService, KanjiService kanjiService, QuestService questService) {
         this.wordDraftRepository = wordDraftRepository;
         this.wordService = wordService;
         this.kanjiService = kanjiService;
+        this.questService = questService;
     }
 
     public WordDraft addWord(WordDraft word) {
-        return wordDraftRepository.save(word);
+        WordDraft wordDraft = wordDraftRepository.save(word);
+
+        if(wordDraft.getId() != null){
+            questService.increaseQuestProgress(word.getUser().getId(), QuestType.NEW_DRAFTS, 1);
+        }
+
+        return wordDraft;
     }
 
     public WordDraft updateWord(WordDraft newWord){
