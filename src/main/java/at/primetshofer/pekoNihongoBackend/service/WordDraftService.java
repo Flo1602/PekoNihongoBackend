@@ -7,6 +7,7 @@ import at.primetshofer.pekoNihongoBackend.entity.QuestType;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.entity.WordDraft;
+import at.primetshofer.pekoNihongoBackend.events.WordDraftCreatedEvent;
 import at.primetshofer.pekoNihongoBackend.repository.WordDraftRepository;
 import at.primetshofer.pekoNihongoBackend.utils.JapaneseUtils;
 import at.primetshofer.pekoNihongoBackend.utils.KanaConverter;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,20 +39,20 @@ public class WordDraftService {
     private final WordDraftRepository wordDraftRepository;
     private final WordService wordService;
     private final KanjiService kanjiService;
-    private final QuestService questService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public WordDraftService(WordDraftRepository wordDraftRepository, WordService wordService, KanjiService kanjiService, QuestService questService) {
+    public WordDraftService(WordDraftRepository wordDraftRepository, WordService wordService, KanjiService kanjiService, ApplicationEventPublisher eventPublisher) {
         this.wordDraftRepository = wordDraftRepository;
         this.wordService = wordService;
         this.kanjiService = kanjiService;
-        this.questService = questService;
+        this.eventPublisher = eventPublisher;
     }
 
     public WordDraft addWord(WordDraft word) {
         WordDraft wordDraft = wordDraftRepository.save(word);
 
         if(wordDraft.getId() != null){
-            questService.increaseQuestProgress(word.getUser().getId(), QuestType.NEW_DRAFTS, 1);
+            eventPublisher.publishEvent(new WordDraftCreatedEvent(wordDraft.getUser().getId(), wordDraft.getId()));
         }
 
         return wordDraft;

@@ -20,4 +20,6 @@ public interface LearnTimeStatsRepository extends JpaRepository<LearnTimeStats, 
     Integer sumExercises(@Param("userId") Long userId);
 
     List<LearnTimeStats> findByUserId(Long userId, Sort sort, Limit limit);
+
+    List<LearnTimeStats> findByUserIdAndDateBetween(Long userId, LocalDate dateAfter, LocalDate dateBefore);
 }

@@ -4,8 +4,9 @@ import at.primetshofer.pekoNihongoBackend.dto.ProgressDataDto;
 import at.primetshofer.pekoNihongoBackend.dto.japneseLearningApp.OldProgressDto;
 import at.primetshofer.pekoNihongoBackend.entity.Learnable;
 import at.primetshofer.pekoNihongoBackend.entity.Progress;
-import at.primetshofer.pekoNihongoBackend.entity.QuestType;
+import at.primetshofer.pekoNihongoBackend.events.DailyProgressEvent;
 import at.primetshofer.pekoNihongoBackend.repository.IProgressRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.JpaSort;
@@ -20,10 +21,10 @@ import java.util.List;
 @Service
 public class TrainerService {
 
-    private final QuestService questService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public TrainerService(QuestService questService) {
-        this.questService = questService;
+    public TrainerService(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
     }
 
     public <T extends Learnable> long getDueElementsCount(IProgressRepository<T> progressRepository, Long userId, int maxElements) {
@@ -90,7 +91,7 @@ public class TrainerService {
         return dueElements.subList(0, elementsToGet);
     }
 
-    public <T extends Learnable> void saveProgress(T t, IProgressRepository<T> progressRepository, int percentage) {
+    public <T extends Learnable> void saveProgress(T t, IProgressRepository<T> progressRepository, int percentage, Long userId) {
         Progress updatedProgress = t.getProgress();
 
         if (updatedProgress == null) {
@@ -107,14 +108,19 @@ public class TrainerService {
         updatedProgress.setNextDueDate(LocalDate.now().plusDays(intervalDays));
 
         int maxIntervalDays = getIntervalDays(getDynamicMaxPoints(updatedProgress));
+        boolean dueToday = intervalDays < maxIntervalDays;
 
-        updatedProgress.setDueToday(intervalDays < maxIntervalDays);
+        updatedProgress.setDueToday(dueToday);
 
         updatedProgress.setLastLearned(LocalDate.now());
 
         t.setProgress(updatedProgress);
 
         progressRepository.save(t);
+
+        if(!dueToday){
+            eventPublisher.publishEvent(new DailyProgressEvent(userId, 1, t.getClass()));
+        }
     }
 
     private int calculateNewPenalty(Progress progress, int percentage) {
@@ -299,10 +305,5 @@ public class TrainerService {
         long completedToday = getCompletedToday(progressRepository, userId);
 
         return new ProgressDataDto(dueToday, completedToday, dueTotal);
-    }
-
-    public <T extends Learnable> void updateQuestProgress(IProgressRepository<T> progressRepository, Long userId, int maxElements, QuestType type){
-        ProgressDataDto progressDataDto = progressDataDto(progressRepository, userId, maxElements);
-        questService.increaseAndUpdateQuestProgress(userId, type, (int)progressDataDto.completedToday(), maxElements);
     }
 }

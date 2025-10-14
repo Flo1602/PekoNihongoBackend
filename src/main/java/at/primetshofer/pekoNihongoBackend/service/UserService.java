@@ -1,21 +1,28 @@
 package at.primetshofer.pekoNihongoBackend.service;
 
+import at.primetshofer.pekoNihongoBackend.entity.Kanji;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.UserSettings;
+import at.primetshofer.pekoNihongoBackend.entity.Word;
+import at.primetshofer.pekoNihongoBackend.events.UpdateDailyGoalEvent;
 import at.primetshofer.pekoNihongoBackend.repository.UserRepository;
 import at.primetshofer.pekoNihongoBackend.security.user.Role;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     public User getUserByUsername(String username) {
@@ -73,6 +80,13 @@ public class UserService {
 
         if (updatedUser.getUserSettings() == null) {
             updatedUser.setUserSettings(new UserSettings());
+        }
+
+        if(!Objects.equals(userSettings.getMaxDailyKanji(), updatedUser.getUserSettings().getMaxDailyKanji())){
+            eventPublisher.publishEvent(new UpdateDailyGoalEvent(userId, userSettings.getMaxDailyKanji(), Kanji.class));
+        }
+        if(!Objects.equals(userSettings.getMaxDailyWords(), updatedUser.getUserSettings().getMaxDailyWords())){
+            eventPublisher.publishEvent(new UpdateDailyGoalEvent(userId, userSettings.getMaxDailyWords(), Word.class));
         }
 
         updatedUser.getUserSettings().setVoiceId(userSettings.getVoiceId());

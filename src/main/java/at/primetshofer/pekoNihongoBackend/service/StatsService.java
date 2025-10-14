@@ -2,9 +2,11 @@ package at.primetshofer.pekoNihongoBackend.service;
 
 import at.primetshofer.pekoNihongoBackend.entity.LearnTimeStats;
 import at.primetshofer.pekoNihongoBackend.entity.User;
+import at.primetshofer.pekoNihongoBackend.events.FirstDailyLoginEvent;
 import at.primetshofer.pekoNihongoBackend.repository.KanjiRepository;
 import at.primetshofer.pekoNihongoBackend.repository.LearnTimeStatsRepository;
 import at.primetshofer.pekoNihongoBackend.repository.WordRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,13 +21,13 @@ public class StatsService {
     private final LearnTimeStatsRepository statsRepository;
     private final KanjiRepository kanjiRepository;
     private final WordRepository wordRepository;
-    private final QuestService questionService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public StatsService(LearnTimeStatsRepository statsRepository, KanjiRepository kanjiRepository, WordRepository wordRepository, QuestService questionService) {
+    public StatsService(LearnTimeStatsRepository statsRepository, KanjiRepository kanjiRepository, WordRepository wordRepository, ApplicationEventPublisher eventPublisher) {
         this.statsRepository = statsRepository;
         this.kanjiRepository = kanjiRepository;
         this.wordRepository = wordRepository;
-        this.questionService = questionService;
+        this.eventPublisher = eventPublisher;
     }
 
     public void addStat(Duration duration, User user) {
@@ -43,7 +45,7 @@ public class StatsService {
             currStat.setUser(user);
 
             if(duration.isZero()){
-                questionService.resetAllDailyQuests(user.getId());
+                eventPublisher.publishEvent(new FirstDailyLoginEvent(user.getId()));
             }
         } else {
             currStat.setDuration(currStat.getDuration().plus(duration));
@@ -74,7 +76,32 @@ public class StatsService {
         return statsRepository.sumExercises(userId);
     }
 
-    public List<LearnTimeStats> getLastStats(int count, long userId){
+    public List<LearnTimeStats> getLastStats(int count, Long userId){
         return statsRepository.findByUserId(userId, Sort.by(Sort.Direction.DESC, "date"), Limit.of(count));
+    }
+
+    public List<LearnTimeStats> getStats(LocalDate from, LocalDate to, Long userId){
+        return statsRepository.findByUserIdAndDateBetween(userId, from, to);
+    }
+
+    private LearnTimeStats getStat(LocalDate date, Long userId){
+        return statsRepository.findByUserIdAndDate(userId, date);
+    }
+
+    public void increaseDailyQuestStreak(Long userId){
+        LearnTimeStats today = getStat(LocalDate.now(), userId);
+        LearnTimeStats yesterday = getStat(LocalDate.now().minusDays(1), userId);
+
+        if(today == null || (today.getStreak() != null && today.getStreak() > 0)){
+            return;
+        }
+
+        if(yesterday == null || yesterday.getStreak() == null || yesterday.getStreak() < 1){
+            today.setStreak(1);
+        } else {
+            today.setStreak(yesterday.getStreak() + 1);
+        }
+
+        statsRepository.save(today);
     }
 }

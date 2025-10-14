@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -37,10 +38,23 @@ public class StatsController {
         List<StatsDto> lastStatsDto = lastStats.stream().map(stat -> new StatsDto(
                 stat.getDate(),
                 stat.getDuration(),
-                stat.getExercises())
+                stat.getExercises(),
+                stat.getStreak())
         ).toList();
 
         return new AllStatsDto(kanjiCount, wordCount, totalLearnTime, totalExercises, lastStatsDto);
+    }
+
+    @GetMapping("/between")
+    public List<StatsDto> getBetweenStats(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
+        List<LearnTimeStats> stats = statsService.getStats(startDate, endDate, webUtils.getCurrentUserId());
+
+        return stats.stream().map(stat -> new StatsDto(
+                stat.getDate(),
+                stat.getDuration(),
+                stat.getExercises(),
+                stat.getStreak())
+        ).toList();
     }
 
     @PostMapping

@@ -70,10 +70,8 @@ public class WordLearnController {
         }));
 
         wordResult.forEach((word, percent) ->
-                trainerService.saveProgress(word, wordProgressRepository, percent)
+                trainerService.saveProgress(word, wordProgressRepository, percent, user.getId())
         );
-
-        trainerService.updateQuestProgress(wordProgressRepository, user.getId(), user.getUserSettings().getMaxDailyWords(), QuestType.DAILY_WORDS);
     }
 
     @GetMapping("/progress")

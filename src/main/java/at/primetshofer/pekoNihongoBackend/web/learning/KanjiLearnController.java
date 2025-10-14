@@ -79,9 +79,7 @@ public class KanjiLearnController {
 
         Kanji kanji = kanjiService.getById(id, user.getId());
 
-        trainerService.saveProgress(kanji, kanjiProgressRepository, correct);
-
-        trainerService.updateQuestProgress(kanjiProgressRepository, user.getId(), user.getUserSettings().getMaxDailyKanji(), QuestType.DAILY_KANJI);
+        trainerService.saveProgress(kanji, kanjiProgressRepository, correct, user.getId());
     }
 
     @GetMapping("/progress")
