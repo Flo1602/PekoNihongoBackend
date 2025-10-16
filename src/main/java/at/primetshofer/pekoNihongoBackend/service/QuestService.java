@@ -86,7 +86,6 @@ public class QuestService {
         }
     }
 
-    @Async
     @EventListener
     protected void handleDailyProgress(DailyProgressEvent event){
         QuestType type = null;
