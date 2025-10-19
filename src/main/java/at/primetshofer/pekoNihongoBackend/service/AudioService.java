@@ -1,6 +1,5 @@
 package at.primetshofer.pekoNihongoBackend.service;
 
-import at.primetshofer.pekoNihongoBackend.config.WebMvcConfig;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.UserSettings;
 import at.primetshofer.pekoNihongoBackend.entity.Word;

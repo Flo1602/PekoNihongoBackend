@@ -1,6 +1,10 @@
 package at.primetshofer.pekoNihongoBackend.entity;
 
+import at.primetshofer.pekoNihongoBackend.enums.QuestCategory;
+import at.primetshofer.pekoNihongoBackend.enums.QuestType;
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 
 @Entity
 public class Quest {
@@ -17,8 +21,12 @@ public class Quest {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "TEXT")
     private QuestType type;
 
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "TEXT")
     private QuestCategory category;
 
     private String text;
@@ -26,6 +34,8 @@ public class Quest {
     private Integer goal;
 
     private Integer progress;
+
+    private LocalDate expirationDate;
 
     public Quest() {
     }
@@ -37,13 +47,14 @@ public class Quest {
         this.goal = goal;
     }
 
-    public Quest(Long id,QuestType type, QuestCategory category, String text, Integer goal, Integer progress) {
+    public Quest(Long id,QuestType type, QuestCategory category, String text, Integer goal, Integer progress, LocalDate expirationDate) {
         this.id = id;
         this.type = type;
         this.category = category;
         this.text = text;
         this.goal = goal;
         this.progress = progress;
+        this.expirationDate = expirationDate;
     }
 
     public Long getId() {
@@ -100,5 +111,13 @@ public class Quest {
 
     public void setProgress(Integer progress) {
         this.progress = progress;
+    }
+
+    public LocalDate getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
     }
 }

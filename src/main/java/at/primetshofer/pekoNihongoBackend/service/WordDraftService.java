@@ -3,7 +3,6 @@ package at.primetshofer.pekoNihongoBackend.service;
 import at.primetshofer.pekoNihongoBackend.dto.KanjiInfoDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordInfoDto;
-import at.primetshofer.pekoNihongoBackend.entity.QuestType;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.entity.WordDraft;
@@ -179,7 +178,6 @@ public class WordDraftService {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            //logger.error("Failed to fetch Jisho URL '" + searchUrl + "'", ex);
         }
 
         return wordDtos;
@@ -207,7 +205,7 @@ public class WordDraftService {
             kanjiInfoDtos.add(new KanjiInfoDto(k.toString(), jlpt != null ? jlpt : "JLPT -", learned));
         }
 
-        String link = "https://jisho.org/search/" + URLEncoder.encode(jp, StandardCharsets.UTF_8);
+        String link = JISHO_URL + URLEncoder.encode(jp, StandardCharsets.UTF_8);
 
         return new WordInfoDto(
                 jp,

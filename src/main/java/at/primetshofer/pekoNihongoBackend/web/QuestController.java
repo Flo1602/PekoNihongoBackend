@@ -23,6 +23,13 @@ public class QuestController {
         this.questService = questService;
     }
 
+    @GetMapping
+    public List<QuestDto> getAllQuests(){
+        List<Quest> dailyQuests = questService.getAllQuests(webUtils.getCurrentUserId());
+
+        return dailyQuests.stream().map(QuestDto::new).toList();
+    }
+
     @GetMapping("/daily")
     public List<QuestDto> getDailyQuests(){
         List<Quest> dailyQuests = questService.getDailyQuests(webUtils.getCurrentUserId());
@@ -49,7 +56,8 @@ public class QuestController {
                 questDto.category(),
                 questDto.text(),
                 questDto.goal(),
-                questDto.progress()), webUtils.getCurrentUserId());
+                questDto.progress(),
+                questDto.expirationDate()), webUtils.getCurrentUserId());
 
         return new QuestDto(quest);
     }

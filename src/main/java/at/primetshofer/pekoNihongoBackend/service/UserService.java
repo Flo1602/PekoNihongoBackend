@@ -38,6 +38,10 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    public User getUserByIdAndLock(Long id) {
+        return userRepository.findAndLock(id).orElse(null);
+    }
+
     public User addUser(User user) {
         return userRepository.save(user);
     }

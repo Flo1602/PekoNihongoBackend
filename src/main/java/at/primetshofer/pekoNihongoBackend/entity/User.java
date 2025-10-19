@@ -47,6 +47,8 @@ public class User {
     )
     private Set<LearnTimeStats> learnTimeStats = new HashSet<>();
 
+    private Integer money;
+
     @Embedded
     private UserSettings userSettings;
 
@@ -121,5 +123,16 @@ public class User {
 
     public void setUserRole(Role userRole) {
         this.userRole = userRole;
+    }
+
+    public Integer getMoney() {
+        if(money == null) {
+            money = 0;
+        }
+        return money;
+    }
+
+    public void setMoney(Integer money) {
+        this.money = money;
     }
 }

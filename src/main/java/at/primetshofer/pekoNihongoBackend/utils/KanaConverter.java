@@ -6,6 +6,8 @@ import java.util.Map;
 
 public class KanaConverter {
 
+    private KanaConverter() {}
+
     // Katakana to Romaji map
     private static final Map<String, String> KATAKANA_TO_ROMAJI = new HashMap<>();
     // Hiragana to Romaji map

@@ -8,6 +8,8 @@ import java.util.List;
 
 public class JapaneseUtils {
 
+    private JapaneseUtils(){}
+
     public static List<Character> extractKanji(String text) {
         List<Character> kanjiList = new ArrayList<>();
 

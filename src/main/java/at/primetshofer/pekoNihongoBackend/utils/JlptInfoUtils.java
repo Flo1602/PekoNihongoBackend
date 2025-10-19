@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 public class JlptInfoUtils {
 
+    private JlptInfoUtils(){}
+
     public static String fetchWordJlpt(HttpClient http, ObjectMapper mapper, String word) {
         try {
             String url = "https://jlpt-vocab-api.vercel.app/api/words?word=" + urlEnc(word);
@@ -27,7 +29,6 @@ public class JlptInfoUtils {
 
             JsonNode root = mapper.readTree(res.body());
 
-            // REST shape appears to be: { total: number, words: [{ word, meaning, furigana, level }] }
             JsonNode wordsNode = root.has("words") ? root.get("words") : root; // fallback if it ever returns an array
             if (wordsNode == null || !wordsNode.isArray() || wordsNode.isEmpty()) return null;
 
@@ -70,15 +71,6 @@ public class JlptInfoUtils {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    private static List<String> extractKanjiChars(String text) {
-        // Unique kanji, in order of first appearance
-        return text.codePoints()
-                .mapToObj(cp -> new String(Character.toChars(cp)))
-                .filter(JlptInfoUtils::isKanji)
-                .distinct()
-                .collect(Collectors.toList());
     }
 
     private static boolean isKanji(String ch) {

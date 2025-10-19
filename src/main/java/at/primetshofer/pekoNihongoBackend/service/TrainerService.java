@@ -58,12 +58,6 @@ public class TrainerService {
             return List.of();
         }
 
-        //Sort.Order orderIsDueTodayDesc = new Sort.Order(Sort.Direction.DESC, "progress.isDueToday").nullsFirst();
-
-        //Sort.Order orderIdDesc = new Sort.Order(Sort.Direction.DESC, "id");
-
-        //Sort sort = Sort.by(orderIsDueTodayDesc, orderIdDesc);
-
         Sort sort = JpaSort.unsafe("CASE " +
                         "WHEN progress.isDueToday IS TRUE THEN 0 " +
                         "WHEN progress.isDueToday IS NULL THEN 1 " +

@@ -3,7 +3,6 @@ package at.primetshofer.pekoNihongoBackend.web.learning;
 import at.primetshofer.pekoNihongoBackend.dto.ProgressDataDto;
 import at.primetshofer.pekoNihongoBackend.dto.ProgressDto;
 import at.primetshofer.pekoNihongoBackend.dto.WordDto;
-import at.primetshofer.pekoNihongoBackend.entity.QuestType;
 import at.primetshofer.pekoNihongoBackend.entity.User;
 import at.primetshofer.pekoNihongoBackend.entity.Word;
 import at.primetshofer.pekoNihongoBackend.repository.WordProgressRepository;

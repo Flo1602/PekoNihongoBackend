@@ -2,6 +2,7 @@ package at.primetshofer.pekoNihongoBackend.service;
 
 import at.primetshofer.pekoNihongoBackend.entity.LearnTimeStats;
 import at.primetshofer.pekoNihongoBackend.entity.User;
+import at.primetshofer.pekoNihongoBackend.events.ExerciseFinishedEvent;
 import at.primetshofer.pekoNihongoBackend.events.FirstDailyLoginEvent;
 import at.primetshofer.pekoNihongoBackend.repository.KanjiRepository;
 import at.primetshofer.pekoNihongoBackend.repository.LearnTimeStatsRepository;
@@ -52,6 +53,10 @@ public class StatsService {
             currStat.setExercises(currStat.getExercises() + 1);
         }
 
+        if(!duration.isZero()){
+            eventPublisher.publishEvent(new ExerciseFinishedEvent(user.getId(), duration));
+        }
+
         statsRepository.save(currStat);
     }
 
@@ -88,12 +93,12 @@ public class StatsService {
         return statsRepository.findByUserIdAndDate(userId, date);
     }
 
-    public void increaseDailyQuestStreak(Long userId){
+    public boolean increaseDailyQuestStreak(Long userId){
         LearnTimeStats today = getStat(LocalDate.now(), userId);
         LearnTimeStats yesterday = getStat(LocalDate.now().minusDays(1), userId);
 
         if(today == null || (today.getStreak() != null && today.getStreak() > 0)){
-            return;
+            return false;
         }
 
         if(yesterday == null || yesterday.getStreak() == null || yesterday.getStreak() < 1){
@@ -103,5 +108,13 @@ public class StatsService {
         }
 
         statsRepository.save(today);
+
+        return true;
+    }
+
+    public boolean isStreakExtended(Long userId){
+        LearnTimeStats today = getStat(LocalDate.now(), userId);
+
+        return today.getStreak() != null && today.getStreak() > 0;
     }
 }
