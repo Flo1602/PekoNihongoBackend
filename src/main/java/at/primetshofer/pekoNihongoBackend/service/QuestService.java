@@ -167,10 +167,10 @@ public class QuestService {
         List<Quest> quests = questRepository.findByUserIdAndType(userId, type);
         if(quests.isEmpty()) return false;
 
-        int tmpAmount = amount;
         boolean change = false;
 
         for(Quest quest : quests){
+            int tmpAmount = amount;
             if(amount == -1 || amount > quest.getGoal() - quest.getProgress()){
                 tmpAmount = quest.getGoal() - quest.getProgress();
             }
@@ -257,7 +257,7 @@ public class QuestService {
         }
 
         if(quest.getType() == QuestType.EXERCISE_TIME){
-            quest.setGoal(random.nextInt(90, 180));
+            quest.setGoal(random.nextInt(90, 180) * 60);
         }else if(quest.getType() == QuestType.EXERCISE_COUNT){
             quest.setGoal(random.nextInt(100, 300));
         }else if(quest.getType() == QuestType.NEW_DRAFTS){
@@ -289,7 +289,7 @@ public class QuestService {
         learnCount.setExpirationDate(nextSunday);
         draftCount.setExpirationDate(nextSunday);
 
-        learnTime.setGoal(random.nextInt(3600, 14400));
+        learnTime.setGoal(random.nextInt(60, 240) * 60);
         learnCount.setGoal(random.nextInt(50, 300));
         draftCount.setGoal(random.nextInt(20, 60));
 
