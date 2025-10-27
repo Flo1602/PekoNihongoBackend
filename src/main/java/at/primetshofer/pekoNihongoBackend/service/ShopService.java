@@ -2,14 +2,18 @@ package at.primetshofer.pekoNihongoBackend.service;
 
 import at.primetshofer.pekoNihongoBackend.dto.ShopItemDto;
 import at.primetshofer.pekoNihongoBackend.entity.User;
+import at.primetshofer.pekoNihongoBackend.enums.EffectType;
 import at.primetshofer.pekoNihongoBackend.enums.ShopItemType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ShopService {
@@ -17,11 +21,13 @@ public class ShopService {
     private final StatsService statsService;
     private final MoneyService moneyService;
     private final QuestService questService;
+    private final EffectsService effectsService;
 
-    public ShopService(StatsService statsService, MoneyService moneyService, QuestService questService) {
+    public ShopService(StatsService statsService, MoneyService moneyService, QuestService questService, EffectsService effectsService) {
         this.statsService = statsService;
         this.moneyService = moneyService;
         this.questService = questService;
+        this.effectsService = effectsService;
     }
 
     public List<ShopItemDto> getAllItems(Long userId) {
@@ -29,7 +35,14 @@ public class ShopService {
         List<ShopItemDto> shopItems = new ArrayList<>(allItems.length);
 
         for (ShopItemType item : allItems) {
-            shopItems.add(new ShopItemDto(item, checkItemAvailability(userId, item)));
+            boolean available = checkItemAvailability(userId, item);
+            LocalDateTime activeTill = null;
+
+            if(!available){
+                activeTill = checkActiveTill(userId, item);
+            }
+
+            shopItems.add(new ShopItemDto(item, available, activeTill));
         }
 
         return shopItems;
@@ -44,12 +57,12 @@ public class ShopService {
             return success;
         }
 
-        if (item == ShopItemType.STREAK_EXTENDER) {
-            success = statsService.increaseDailyQuestStreak(user.getId());
-        }
-
-        if(item ==ShopItemType.CHALLENGE_QUEST){
-            success = questService.createRandomChallengeQuest(user);
+        switch (item) {
+            case STREAK_EXTENDER -> success = statsService.increaseDailyQuestStreak(user.getId());
+            case CHALLENGE_QUEST -> success = questService.createRandomChallengeQuest(user);
+            case DAILY_QUEST_EDIT_15_MIN -> {
+                success = effectsService.applyEffect(user, EffectType.ALLOW_DAILY_QUESTS_EDIT, Duration.ofMinutes(15));
+            }
         }
 
         if(!success){
@@ -83,17 +96,26 @@ public class ShopService {
             case STREAK_EXTENDER -> {
                 return !statsService.isStreakExtended(userId);
             }
-            case MONEY_GAMBLE, MONEY_GAMBLE_HIGH_RISK -> {
-                return true;
-            }
             case CHALLENGE_QUEST -> {
                 return !questService.hasActiveChallengeQuest(userId);
             }
-
+            case DAILY_QUEST_EDIT_15_MIN -> {
+                return !effectsService.hasEffect(userId, EffectType.ALLOW_DAILY_QUESTS_EDIT);
+            }
+            case MONEY_GAMBLE, MONEY_GAMBLE_HIGH_RISK -> {
+                return true;
+            }
             default -> {
                 return false;
             }
         }
+    }
+
+    private LocalDateTime checkActiveTill(Long userId, ShopItemType item) {
+        if (item == ShopItemType.DAILY_QUEST_EDIT_15_MIN) {
+            return effectsService.getActiveEffect(userId, EffectType.ALLOW_DAILY_QUESTS_EDIT).getExpirationDateTime();
+        }
+        return null;
     }
 
     private double gambleLowRisk(){
