@@ -22,4 +22,6 @@ public interface LearnTimeStatsRepository extends JpaRepository<LearnTimeStats, 
     List<LearnTimeStats> findByUserId(Long userId, Sort sort, Limit limit);
 
     List<LearnTimeStats> findByUserIdAndDateBetween(Long userId, LocalDate dateAfter, LocalDate dateBefore);
+
+    List<LearnTimeStats> findByUserIdAndDateBetween(Long userId, LocalDate dateAfter, LocalDate dateBefore, Sort sort);
 }

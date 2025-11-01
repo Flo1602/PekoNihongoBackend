@@ -33,6 +33,13 @@ public class LearnTimeStats {
     public LearnTimeStats() {
     }
 
+    public LearnTimeStats(User user, LocalDate date, Duration duration, int exercises) {
+        this.user = user;
+        this.date = date;
+        this.duration = duration;
+        this.exercises = exercises;
+    }
+
     public LearnTimeStats(LocalDate date, Duration duration, int exercises) {
         this.date = date;
         this.duration = duration;

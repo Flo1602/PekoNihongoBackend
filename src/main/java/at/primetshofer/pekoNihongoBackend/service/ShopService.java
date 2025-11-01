@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class ShopService {
@@ -60,9 +59,8 @@ public class ShopService {
         switch (item) {
             case STREAK_EXTENDER -> success = statsService.increaseDailyQuestStreak(user.getId());
             case CHALLENGE_QUEST -> success = questService.createRandomChallengeQuest(user);
-            case DAILY_QUEST_EDIT_15_MIN -> {
-                success = effectsService.applyEffect(user, EffectType.ALLOW_DAILY_QUESTS_EDIT, Duration.ofMinutes(15));
-            }
+            case DAILY_QUEST_EDIT_15_MIN -> success = effectsService.applyEffect(user, EffectType.ALLOW_DAILY_QUESTS_EDIT, Duration.ofMinutes(15));
+            case STREAK_REPAIR -> success = statsService.repairStreak(user);
         }
 
         if(!success){
@@ -102,7 +100,7 @@ public class ShopService {
             case DAILY_QUEST_EDIT_15_MIN -> {
                 return !effectsService.hasEffect(userId, EffectType.ALLOW_DAILY_QUESTS_EDIT);
             }
-            case MONEY_GAMBLE, MONEY_GAMBLE_HIGH_RISK -> {
+            case MONEY_GAMBLE, MONEY_GAMBLE_HIGH_RISK, STREAK_REPAIR -> {
                 return true;
             }
             default -> {
