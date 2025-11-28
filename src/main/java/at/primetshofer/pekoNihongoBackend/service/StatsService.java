@@ -90,7 +90,8 @@ public class StatsService {
     }
 
     public List<LearnTimeStats> getStats(LocalDate from, LocalDate to, Long userId) {
-        return statsRepository.findByUserIdAndDateBetween(userId, from, to);
+        Sort sort = Sort.by(Sort.Direction.ASC, "date");
+        return getStats(from, to, userId, sort);
     }
 
     public List<LearnTimeStats> getStats(LocalDate from, LocalDate to, Long userId, Sort sort) {
@@ -129,15 +130,63 @@ public class StatsService {
     public boolean repairStreak(User user) {
         Sort sort = Sort.by(Sort.Direction.DESC, "date");
 
-        List<LearnTimeStats> stats = getStats(LocalDate.now().minusDays(90), LocalDate.now().minusDays(1), user.getId(), sort);
+        List<LearnTimeStats> stats = getStats(LocalDate.now().minusDays(90), LocalDate.now(), user.getId(), sort);
 
         Stack<LearnTimeStats> streakStack = new Stack<>();
+
+        if(!searchStreakMiss(stats, streakStack, user)){
+            return false;
+        }
+
+        if (isMissInvalid(streakStack)) {
+            return false;
+        }
+
+        return fixAndUpdateStreak(streakStack);
+    }
+
+    private boolean fixAndUpdateStreak(Stack<LearnTimeStats> streakStack) {
         LearnTimeStats lastStat;
+        Set<LearnTimeStats> toUpdate = new HashSet<>();
+
+        lastStat = streakStack.pop();
+        LearnTimeStats fixed = streakStack.pop();
+
+        if (Math.abs(ChronoUnit.DAYS.between(lastStat.getDate(), fixed.getDate())) != 1) {
+            return false;
+        }
+
+        fixed.setStreak(lastStat.getStreak() + 1);
+        toUpdate.add(fixed);
+        lastStat = fixed;
+
+        while (!streakStack.isEmpty()) {
+            LearnTimeStats stat = streakStack.pop();
+
+            stat.setStreak(lastStat.getStreak() + 1);
+            toUpdate.add(stat);
+
+            lastStat = stat;
+        }
+
+        statsRepository.saveAll(toUpdate);
+        return true;
+    }
+
+    private static boolean isMissInvalid(Stack<LearnTimeStats> streakStack) {
+        return streakStack.isEmpty() || streakStack.peek().getStreak() == null || streakStack.peek().getStreak() < 1;
+    }
+
+    private boolean searchStreakMiss(List<LearnTimeStats> stats, Stack<LearnTimeStats> streakStack, User user){
         boolean brokenFound = false;
+        LearnTimeStats lastStat;
 
         for (LearnTimeStats stat : stats) {
-
             lastStat = streakStack.isEmpty() ? null : streakStack.peek();
+
+            if(stat.getDate().equals(LocalDate.now()) && (stat.getStreak() == null || stat.getStreak() == 0)){
+                continue;
+            }
 
             if (lastStat != null) {
                 long daysBetween = Math.abs(ChronoUnit.DAYS.between(stat.getDate(), lastStat.getDate()));
@@ -171,34 +220,6 @@ public class StatsService {
             streakStack.push(stat);
         }
 
-        if (!brokenFound || streakStack.isEmpty() || streakStack.peek().getStreak() == null || streakStack.peek().getStreak() < 1) {
-            return false;
-        }
-
-        Set<LearnTimeStats> toUpdate = new HashSet<>();
-
-        lastStat = streakStack.pop();
-        LearnTimeStats fixed = streakStack.pop();
-
-        if (Math.abs(ChronoUnit.DAYS.between(lastStat.getDate(), fixed.getDate())) != 1) {
-            return false;
-        }
-
-        fixed.setStreak(lastStat.getStreak() + 1);
-        toUpdate.add(fixed);
-        lastStat = fixed;
-
-        while (!streakStack.isEmpty()) {
-            LearnTimeStats stat = streakStack.pop();
-
-            stat.setStreak(lastStat.getStreak() + 1);
-            toUpdate.add(stat);
-
-            lastStat = stat;
-        }
-
-        statsRepository.saveAll(toUpdate);
-
-        return true;
+        return brokenFound;
     }
 }
